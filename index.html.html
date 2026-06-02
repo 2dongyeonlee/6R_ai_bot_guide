@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6R전략 담당 구성원 AI비서봇 생성 가이드</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg: #f5f0e8;
+  --sidebar-bg: #2c2c38;
+  --surface: #ffffff;
+  --surface2: #f9f6f0;
+  --border: #e2d9cc;
+  --border-light: #ede8e0;
+  --accent: #2a5caa;
+  --accent2: #7c4dbd;
+  --accent3: #1a7a4a;
+  --accent4: #c05c00;
+  --text: #1a1a2e;
+  --text-dim: #5a5a7a;
+  --text-bright: #0d0d1a;
+  --code-bg: #1e1e2e;
+  --sidebar-width: 260px;
+  --green: #1a7a4a;
+  --orange: #c05c00;
+  --red: #b91c1c;
+  --sidebar-text: #b0b0c8;
+  --sidebar-active: #ffffff;
+  --sidebar-accent: #7eb3ff;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ── 사이드바 ── */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  border-right: 1px solid #3a3a4e;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar::-webkit-scrollbar { width:3px; }
+.sidebar::-webkit-scrollbar-thumb { background:#4a4a60; }
+
+.sidebar-header {
+  padding: 24px 20px 18px;
+  border-bottom: 1px solid #3a3a4e;
+  flex-shrink: 0;
+}
+.s-logo {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--sidebar-accent);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.s-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--sidebar-active);
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+.s-meta {
+  padding-top: 10px;
+  border-top: 1px solid #3a3a4e;
+}
+.s-meta-row { font-size: 11px; color: var(--sidebar-text); line-height: 1.8; }
+.s-meta-row strong { color: #d0d8f0; }
+.s-meta-link { font-size: 11px; color: var(--sidebar-accent); margin-top:4px; display:block; }
+
+.s-group-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: #4a4a60;
+  text-transform: uppercase;
+  padding: 18px 20px 7px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  color: var(--sidebar-text);
+  font-size: 13px;
+  font-weight: 400;
+  transition: all 0.12s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.nav-item:hover { background: rgba(255,255,255,0.05); color: #e0e0f0; }
+.nav-item.active {
+  background: rgba(126,179,255,0.12);
+  border-left-color: var(--sidebar-accent);
+  color: var(--sidebar-active);
+  font-weight: 600;
+}
+.nav-item .ni { font-size: 14px; flex-shrink:0; width:18px; text-align:center; }
+.nav-item .nb {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: rgba(126,179,255,0.2);
+  color: var(--sidebar-accent);
+  flex-shrink: 0;
+}
+.nav-item .nb.done { background: rgba(26,122,74,0.3); color: #6ee7a0; }
+.nav-item .nb.new { background: rgba(192,92,0,0.3); color: #fbbf24; }
+
+.s-progress {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid #3a3a4e;
+  flex-shrink: 0;
+}
+.s-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--sidebar-text);
+  margin-bottom: 7px;
+}
+.s-progress-bar { height: 4px; background: #3a3a4e; border-radius: 2px; overflow: hidden; }
+.s-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sidebar-accent), #a78bfa);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+/* ── 메인 ── */
+.main { flex: 1; height: 100vh; overflow-y: auto; overflow-x: hidden; }
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-thumb { background: #ccc5b8; border-radius: 3px; }
+
+.content { padding: 48px 60px 80px; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── 섹션 헤더 ── */
+.sec-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.sec-title {
+  font-size: 30px;
+  font-weight: 900;
+  color: var(--text-bright);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.sec-desc {
+  font-size: 15px;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--border);
+  max-width: 820px;
+}
+
+/* ── 카드 ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 26px;
+  margin-bottom: 18px;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── URL 그리드 ── */
+.url-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.url-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  transition: all 0.15s;
+}
+.url-card:hover { border-color: var(--accent); box-shadow: 0 3px 16px rgba(42,92,170,0.1); transform: translateY(-2px); }
+.uc-name { font-size: 13px; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+.uc-desc { font-size: 12px; color: var(--text-dim); line-height: 1.4; margin-bottom: 12px; }
+.uc-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+.uc-badge.free { background: #d1fae5; color: #065f46; }
+.uc-badge.paid { background: #fef3c7; color: #92400e; }
+.url-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 6px;
+  transition: background 0.12s;
+}
+.url-btn:hover { background: #1e4a8a; }
+
+/* ── 스텝 아코디언 ── */
+.step-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.step-hd {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s;
+}
+.step-hd:hover { background: var(--surface2); }
+.step-num {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-num.alpha { background: var(--accent2); }
+.step-num.done-num { background: var(--green); }
+.step-info { flex: 1; }
+.step-info h3 { font-size: 15px; font-weight: 700; color: var(--text-bright); }
+.step-info p { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.step-chevron { color: var(--text-dim); font-size: 16px; transition: transform 0.2s; }
+.step-card.open .step-chevron { transform: rotate(180deg); }
+.step-bd {
+  display: none;
+  padding: 4px 22px 22px;
+  border-top: 1px solid var(--border-light);
+}
+.step-card.open .step-bd { display: block; }
+
+/* ── 인스트럭션 ── */
+.inst-list { padding-top: 6px; }
+.inst {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  align-items: flex-start;
+}
+.inst:last-child { border-bottom: none; }
+.inst-n {
+  width: 22px; height: 22px;
+  background: #e8f0fb;
+  color: var(--accent);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top:2px;
+}
+.inst-t { font-size: 14px; color: var(--text); line-height: 1.6; }
+.inst-t strong { color: var(--accent); font-weight: 600; }
+.inst-t .p {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: #e8f0fb;
+  color: var(--accent);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.inst-t .pg {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.inst-t a { color: var(--accent); }
+
+/* ── 배너 ── */
+.banner {
+  border-radius: 8px;
+  padding: 13px 16px;
+  margin: 14px 0;
+  display: flex;
+  gap: 11px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  align-items: flex-start;
+}
+.banner-i { font-size: 16px; flex-shrink: 0; margin-top:1px; }
+.banner.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.banner.success { background: #f0fdf4; color: #14532d; border: 1px solid #bbf7d0; }
+.banner.warn { background: #fffbeb; color: #78350f; border: 1px solid #fde68a; }
+.banner.purple { background: #f5f3ff; color: #4c1d95; border: 1px solid #ddd6fe; }
+.banner.tip { background: #fef9f0; color: #7c3313; border: 1px solid #fed7aa; }
+
+/* ── API 위치 안내 ── */
+.api-loc {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent3);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+.api-loc-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.api-loc-path {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  color: var(--green);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.api-loc-note { font-size: 12px; color: var(--text-dim); }
+
+/* ── 코드 블록 ── */
+.code-wrap {
+  background: var(--code-bg);
+  border: 1px solid #333;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 14px 0;
+}
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid #333;
+}
+.code-fname { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7070a0; }
+.copy-btn {
+  font-size: 11px;
+  color: #7070a0;
+  background: none;
+  border: 1px solid #444;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.12s;
+}
+.copy-btn:hover { border-color: #7eb3ff; color: #7eb3ff; }
+.copy-btn.copied { border-color: #6ee7a0; color: #6ee7a0; }
+.code-body { padding: 16px 18px; overflow-x: auto; }
+.code-body pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #cdd6f4;
+  white-space: pre;
+}
+.cm { color: #45475a; }
+.kw { color: #cba6f7; }
+.st { color: #a6e3a1; }
+.fn { color: #89b4fa; }
+.vr { color: #f38ba8; }
+.nm { color: #fab387; }
+
+/* ── 플로우 ── */
+.flow {
+  background: #1a1a2e;
+  border: 1px solid #2a2a40;
+  border-radius: 10px;
+  padding: 22px 24px;
+  margin: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 2;
+  overflow-x: auto;
+  white-space: pre;
+  color: #cdd6f4;
+}
+.fa { color: #89b4fa; }
+.fg { color: #a6e3a1; }
+.fo { color: #fab387; }
+.fp { color: #cba6f7; }
+.fd { color: #45475a; }
+
+/* ── 테이블 ── */
+.gt { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+.gt th {
+  background: var(--surface2);
+  padding: 11px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-dim);
+  border-bottom: 2px solid var(--border);
+  font-size: 12px;
+}
+.gt td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+  vertical-align: top;
+}
+.gt tr:last-child td { border-bottom: none; }
+.gt code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: #e8f0fb;
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.gt tr:hover td { background: #faf8f4; }
+.tag-free { color: #065f46; font-weight: 700; font-size: 12px; }
+.tag-paid { color: #92400e; font-weight: 700; font-size: 12px; }
+
+/* ── 완료 버튼 ── */
+.done-row {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.done-btn {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.12s;
+}
+.done-btn:hover { background: #145c38; }
+.done-btn.undone { background: #e0dbd2; color: #888; }
+.done-note { font-size: 12px; color: var(--text-dim); }
+
+/* ── 체크 카드 ── */
+.check-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.check-card-title { font-size: 14px; font-weight: 700; color: #14532d; margin-bottom: 14px; }
+.check-row { display: flex; gap: 10px; padding: 6px 0; align-items: flex-start; }
+.chk {
+  width: 18px; height: 18px;
+  border: 2px solid #86efac;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.chk-t { font-size: 14px; color: var(--text); }
+.chk-s { font-size: 12px; color: var(--text-dim); margin-top:2px; }
+
+/* ── 비전 카드 ── */
+.vision-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #2a2050 100%);
+  border-radius: 14px;
+  padding: 32px;
+  margin-bottom: 18px;
+  color: #e0e0f0;
+}
+.vision-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 12px; }
+.vision-desc { font-size: 14px; line-height: 1.8; color: #b0b0d0; }
+.vision-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.vision-tag {
+  background: rgba(126,179,255,0.15);
+  color: #7eb3ff;
+  border: 1px solid rgba(126,179,255,0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ── 두 컬럼 ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+
+/* ── 인라인 코드 ── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: #e8f0fb;
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+</style>
+</head>
+<body>
+
+<!-- ── 사이드바 ── -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="s-logo">6R Strategy · AI Comm</div>
+    <div class="s-title">AI 비서봇<br>생성 가이드</div>
+    <div class="s-meta">
+      <div class="s-meta-row">제작 <strong>이동연 TL</strong> · AI Comm 기획팀</div>
+      <div class="s-meta-row" style="margin-top:8px; font-size:10px; color:#4a4a60;">문의</div>
+      <a class="s-meta-link" href="https://t.me/dylee_ai_bot" target="_blank">텔레그램 @dylee_ai_bot</a>
+      <div class="s-meta-row" style="font-size:10px;">또는 이동연 TL에게 직접</div>
+    </div>
+  </div>
+
+  <div class="s-group-label">개요</div>
+  <div class="nav-item active" onclick="go('overview',this)"><span class="ni">🗺️</span> 전체 구조 & 비전</div>
+  <div class="nav-item" onclick="go('urls',this)"><span class="ni">🔗</span> 접속 URL 모음</div>
+
+  <div class="s-group-label">실습 단계</div>
+  <div class="nav-item" onclick="go('s1',this)" id="nav-s1"><span class="ni">📱</span> Step 1. 텔레그램 봇 생성<span class="nb" id="b-s1">시작</span></div>
+  <div class="nav-item" onclick="go('s2',this)" id="nav-s2"><span class="ni">🧠</span> Step 2. LLM API 발급<span class="nb" id="b-s2">시작</span></div>
+  <div class="nav-item" onclick="go('s3',this)" id="nav-s3"><span class="ni">🤖</span> Step 3. Dify 에이전트<span class="nb" id="b-s3">시작</span></div>
+  <div class="nav-item" onclick="go('s4',this)" id="nav-s4"><span class="ni">⚡</span> Step 4. Cloudflare 배포<span class="nb" id="b-s4">시작</span></div>
+  <div class="nav-item" onclick="go('s5',this)" id="nav-s5"><span class="ni">🐙</span> Step 5. GitHub 저장<span class="nb" id="b-s5">시작</span></div>
+  <div class="nav-item" onclick="go('s6',this)" id="nav-s6"><span class="ni">🧪</span> Step 6. 테스트 & 완료<span class="nb" id="b-s6">시작</span></div>
+
+  <div class="s-group-label">심화</div>
+  <div class="nav-item" onclick="go('connect',this)"><span class="ni">🔗</span> 봇끼리 연결하기<span class="nb new">심화</span></div>
+
+  <div class="s-group-label">참고 자료</div>
+  <div class="nav-item" onclick="go('code',this)"><span class="ni">📋</span> 예시 코드 (이동연A봇)</div>
+  <div class="nav-item" onclick="go('prompt',this)"><span class="ni">✍️</span> AI 코드 생성 프롬프트</div>
+  <div class="nav-item" onclick="go('syspt',this)"><span class="ni">💬</span> 시스템 프롬프트 예시</div>
+  <div class="nav-item" onclick="go('faq',this)"><span class="ni">❓</span> 막혔을 때 (FAQ)</div>
+
+  <div class="s-progress">
+    <div class="s-progress-label"><span>실습 진행률</span><span id="prog-txt">0 / 6</span></div>
+    <div class="s-progress-bar"><div class="s-progress-fill" id="prog-fill"></div></div>
+  </div>
+</aside>
+
+<!-- ── 메인 ── -->
+<main class="main">
+<div class="content">
+
+<!-- ══════ 전체 구조 & 비전 ══════ -->
+<div class="section active" id="sec-overview">
+  <div class="sec-eyebrow">Overview</div>
+  <div class="sec-title">6R전략 담당 구성원 AI비서봇 생성 가이드</div>
+  <div class="sec-desc">각자의 AI 비서봇을 직접 만들고 운영한다. 이것은 시작일 뿐 — 봇끼리 연결하고, 더 많은 서비스와 붙여나가는 <strong>AI 개인비서 플랫폼의 초기 형태</strong>다.</div>
+
+  <!-- 비전 카드 -->
+  <div class="vision-card">
+    <div class="vision-title">🚀 이건 단순한 챗봇이 아니다</div>
+    <div class="vision-desc">
+      오늘 만드는 텔레그램 봇은 <strong style="color:#fff">AI 개인비서 플랫폼의 첫 번째 레이어</strong>다.<br>
+      봇끼리 연결되면 팀 단위 AI 워크플로우가 되고, 여기에 캘린더·노션·슬랙·이메일을 붙이면 실제 업무 자동화 에이전트가 된다.<br><br>
+      지금 이 경험이 그 시작점이다. 직접 만들어야 이해하고, 이해해야 확장할 수 있다.
+    </div>
+    <div class="vision-tags">
+      <span class="vision-tag">현재: 개인 AI 비서봇</span>
+      <span class="vision-tag">→ 봇 간 연결 (팀 워크플로우)</span>
+      <span class="vision-tag">→ 외부 서비스 연동</span>
+      <span class="vision-tag">→ 업무 자동화 에이전트</span>
+    </div>
+  </div>
+
+  <!-- 도구 설명 -->
+  <div class="card">
+    <div class="card-title">💡 각 도구, 왜 필요한가 — 한 줄씩</div>
+    <table class="gt">
+      <thead><tr><th>도구</th><th>역할</th><th>이게 없으면?</th><th>비용</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>📱 텔레그램</strong></td>
+          <td>내가 봇에게 말 걸고 답 받는 채팅 창구</td>
+          <td style="color:var(--text-dim); font-size:13px">봇에게 말 걸 방법이 없음</td>
+          <td class="tag-free">무료</td>
+        </tr>
+        <tr>
+          <td><strong>⚡ Cloudflare</strong></td>
+          <td>텔레그램↔Dify 연결 서버. 봇끼리 메시지 전달 허브. 24시간 자동 실행</td>
+          <td style="color:var(--text-dim); font-size:13px">텔레그램과 AI가 연결 불가</td>
+          <td class="tag-free">무료</td>
+        </tr>
+        <tr>
+          <td><strong>🤖 Dify</strong></td>
+          <td>두뇌에게 내 역할·말투를 부여. 대화 맥락 기억. 시스템 프롬프트 관리</td>
+          <td style="color:var(--text-dim); font-size:13px">AI가 내가 누구인지 모름, 매번 처음부터</td>
+          <td class="tag-free">무료</td>
+        </tr>
+        <tr>
+          <td><strong>🧠 LLM API</strong><br><span style="font-size:12px; color:var(--text-dim)">Gemini / Claude / GPT</span></td>
+          <td>실제로 생각하고 답변 생성. 이게 봇의 두뇌</td>
+          <td style="color:var(--text-dim); font-size:13px">봇이 아무 답도 못 함</td>
+          <td class="tag-paid">Gemini 무료<br><span style="font-size:11px">Claude·GPT 유료</span></td>
+        </tr>
+        <tr>
+          <td><strong>📦 KV Storage</strong><br><span style="font-size:12px; color:var(--text-dim)">Cloudflare 내부</span></td>
+          <td>"권오혁" → chat_id 처럼 이름:값을 저장. 봇 간 연결에 쓰이는 주소록</td>
+          <td style="color:var(--text-dim); font-size:13px">봇끼리 서로 찾을 수 없음</td>
+          <td class="tag-free">무료</td>
+        </tr>
+        <tr>
+          <td><strong>🐙 GitHub</strong></td>
+          <td>worker.js 코드 안전 보관. 버전 관리. 팀원 코드 참고</td>
+          <td style="color:var(--text-dim); font-size:13px">코드 분실 시 처음부터 다시 작성</td>
+          <td class="tag-free">무료</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="banner warn"><div class="banner-i">💰</div><div><strong>비용은 모두 각자 부담.</strong> 텔레그램·Cloudflare·Dify·GitHub는 무료. LLM API는 <strong>Gemini(Google AI Studio) 무료 추천</strong> — 신용카드 불필요. Claude·GPT는 개인 카드로 유료 결제.</div></div>
+  </div>
+
+  <!-- 전체 흐름 -->
+  <div class="card">
+    <div class="card-title">🔄 메시지 처리 전체 흐름</div>
+    <div class="flow"><span class="fo">📱 내가 텔레그램에서 봇에게 말함</span>
+         ↓  <span class="fd">(Webhook — 텔레그램이 메시지를 Cloudflare로 자동 전달)</span>
+<span class="fa">⚡ Cloudflare Worker</span>  <span class="fd">← 내 봇의 두뇌와 연결하는 24시간 서버</span>
+         ├── <span class="fp">"OOO에게 ~해줘" 감지</span>  →  <span class="fp">KV에서 그 사람 chat_id 조회 → 텔레그램으로 전달</span>
+         └── <span class="fd">일반 질문</span>  →  <span class="fg">🤖 Dify Agent 호출</span>
+                                     ↓
+                           <span class="fg">시스템 프롬프트(내 역할) + 대화 맥락 적용</span>
+                                     ↓
+                           <span class="fa">🧠 LLM API 호출</span>  <span class="fd">(내가 선택한 두뇌 — Gemini/Claude/GPT)</span>
+                                     ↓
+<span class="fo">📱 텔레그램으로 답변 도착</span></div>
+  </div>
+
+  <!-- 오늘 할 일 -->
+  <div class="card">
+    <div class="card-title">📋 오늘 만들 계정 & 순서 — 전부 각자</div>
+    <table class="gt">
+      <thead><tr><th>#</th><th>할 일</th><th>위치</th><th>시간</th></tr></thead>
+      <tbody>
+        <tr><td>1️⃣</td><td>텔레그램 봇 생성 (BotFather)</td><td><code>t.me/BotFather</code></td><td>5분</td></tr>
+        <tr><td>2️⃣</td><td>LLM API Key 발급 — 두뇌 선택</td><td><code>aistudio.google.com</code> 등</td><td>5분</td></tr>
+        <tr><td>3️⃣</td><td>Dify 가입 + 에이전트 생성</td><td><code>cloud.dify.ai</code></td><td>10분</td></tr>
+        <tr><td>4️⃣</td><td>Cloudflare 가입 + Worker 배포</td><td><code>dash.cloudflare.com</code></td><td>15분</td></tr>
+        <tr><td>5️⃣</td><td>GitHub 가입 + 코드 저장</td><td><code>github.com</code></td><td>5분</td></tr>
+        <tr><td>6️⃣</td><td>Worker URL + chat_id → 이동연 TL에게 공유</td><td>카카오톡·슬랙</td><td>1분</td></tr>
+      </tbody>
+    </table>
+    <div class="banner info"><div class="banner-i">💡</div><div>6번이 핵심. 모든 구성원의 URL과 chat_id가 모여야 봇끼리 연결된다. 이게 팀 AI 워크플로우의 출발점이다.</div></div>
+  </div>
+
+  <!-- 현재 팀 현황 -->
+  <div class="card">
+    <div class="card-title">👥 팀 봇 현황</div>
+    <table class="gt">
+      <thead><tr><th>구성원</th><th>봇 상태</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td><strong>이동연 TL</strong></td><td><span style="color:var(--green); font-weight:700;">✅ 운영 중</span></td><td>이동연(A)봇 · <code>@dylee_ai_bot</code></td></tr>
+        <tr><td><strong>권오혁</strong></td><td><span style="color:var(--green); font-weight:700;">✅ 운영 중</span></td><td>권오혁(A)봇 · 참고 코드 제공</td></tr>
+        <tr><td><strong>구정모 팀장</strong></td><td><span style="color:var(--orange); font-weight:700;">⏳ 계정 준비 중</span></td><td>오늘 세션에서 생성 예정</td></tr>
+        <tr><td><strong>김민아 TL</strong></td><td><span style="color:#aaa;">— 미시작</span></td><td>오늘 생성</td></tr>
+        <tr><td><strong>황성욱 TL</strong></td><td><span style="color:#aaa;">— 미시작</span></td><td>오늘 생성</td></tr>
+        <tr><td><strong>이기두 TL</strong></td><td><span style="color:#aaa;">— 미시작</span></td><td>오늘 생성</td></tr>
+        <tr><td><strong>위예슬 TL</strong></td><td><span style="color:#aaa;">— 미시작</span></td><td>오늘 생성</td></tr>
+        <tr><td><strong>홍석윤 TL</strong></td><td><span style="color:#aaa;">— 미시작</span></td><td>오늘 생성</td></tr>
+        <tr><td><strong>성봉구 팀장</strong></td><td><span style="color:#aaa;">— 미시작</span></td><td>오늘 생성</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════ URL 모음 ══════ -->
+<div class="section" id="sec-urls">
+  <div class="sec-eyebrow">Quick Links</div>
+  <div class="sec-title">접속 URL 모음</div>
+  <div class="sec-desc">실습에 필요한 모든 사이트. 지금 탭으로 다 열어두자.</div>
+  <div class="url-grid">
+    <div class="url-card">
+      <div class="uc-name">📱 Telegram BotFather</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">내 봇 이름·Token 생성. 봇의 입구.</div>
+      <a href="https://t.me/BotFather" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🔍 Telegram userinfobot</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">내 chat_id(숫자) 확인용. 봇 간 연결에 필요.</div>
+      <a href="https://t.me/userinfobot" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🧠 Google AI Studio</div>
+      <div class="uc-badge free">무료 추천</div>
+      <div class="uc-desc">Gemini API Key 발급. 신용카드 불필요.</div>
+      <a href="https://aistudio.google.com" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🧠 Anthropic Console</div>
+      <div class="uc-badge paid">유료</div>
+      <div class="uc-desc">Claude API Key 발급. 카드 등록 필요.</div>
+      <a href="https://console.anthropic.com" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🧠 OpenAI Platform</div>
+      <div class="uc-badge paid">유료</div>
+      <div class="uc-desc">ChatGPT API Key 발급. 카드 등록 필요.</div>
+      <a href="https://platform.openai.com" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🤖 Dify</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">에이전트 플랫폼. 역할·말투 설정.</div>
+      <a href="https://cloud.dify.ai" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">⚡ Cloudflare</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">Worker 코드 배포. 봇 연결 서버.</div>
+      <a href="https://dash.cloudflare.com" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🐙 GitHub</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">worker.js 코드 저장·버전 관리.</div>
+      <a href="https://github.com" target="_blank" class="url-btn">접속 →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ STEP 1 ══════ -->
+<div class="section" id="sec-s1">
+  <div class="sec-eyebrow">Step 1 / 6</div>
+  <div class="sec-title">📱 텔레그램 봇 생성</div>
+  <div class="sec-desc">BotFather에서 내 봇 이름을 만들고 Token(봇의 열쇠)을 받는다. 약 5분.</div>
+
+  <div class="banner info"><div class="banner-i">🔑</div><div><strong>Bot Token이란?</strong> 텔레그램이 "이게 진짜 네 봇"임을 확인하는 비밀 문자열. 나중에 Cloudflare 환경변수에 입력한다. 절대 타인과 공유 금지.</div></div>
+  <div class="banner purple"><div class="banner-i">🪪</div><div><strong>텔레그램 chat_id(숫자 ID)가 왜 필요한가?</strong> 텔레그램은 모든 사용자에게 고유한 숫자 ID를 부여한다. 봇 간 메시지를 보낼 때 "권오혁 TL에게 전달해줘"를 처리하려면 그 사람의 chat_id가 필요하다. 내 chat_id = 다른 봇이 나를 찾는 주소다.</div></div>
+
+  <div class="step-card open">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">1</div>
+      <div class="step-info"><h3>BotFather 찾기</h3><p>텔레그램 앱 검색창에서</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">텔레그램 검색창에 <strong>@BotFather</strong> 검색</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">파란 ✓ 체크마크 있는 공식 계정 선택</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t"><span class="p">/start</span> 입력 → 메뉴 확인</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">2</div>
+      <div class="step-info"><h3>새 봇 생성 + Token 발급</h3><p>/newbot 명령어로 봇 만들기</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t"><span class="p">/newbot</span> 입력 → 봇 표시명 입력 예: <strong>이동연봇</strong></div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">봇 username 입력 — 반드시 <strong>bot</strong>으로 끝나야 함 예: <strong>dongyeon_6r_bot</strong></div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">Token 발급됨 → <span class="pg">123456789:AAxxxxxxxxxx</span> 형태 → 즉시 복사해서 메모장 저장</div></div>
+      </div>
+      <div class="banner warn"><div class="banner-i">⚠️</div><div>username은 전 세계에서 유일해야 함. 이미 사용 중이면 숫자·팀명 추가. 예: <code>dy_aicomm_bot</code></div></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">3</div>
+      <div class="step-info"><h3>내 chat_id 확인</h3><p>봇 간 연결에 필요한 내 개인 ID</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">텔레그램에서 <strong>@userinfobot</strong> 검색 → 아무 메시지 전송</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">응답에서 <strong>Id:</strong> 뒤 숫자 확인 → 이게 내 <span class="p">chat_id</span></div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">Token + chat_id 둘 다 메모장에 보관</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="check-card">
+    <div class="check-card-title">✅ Step 1 완료 체크</div>
+    <div class="check-row"><div class="chk"></div><div><div class="chk-t">Bot Token 복사 완료</div><div class="chk-s">형식: 123456789:AAxxxx...</div></div></div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">내 chat_id(숫자) 복사 완료</div></div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">t.me/내봇username 으로 접속 확인</div></div>
+    <div class="done-row">
+      <button class="done-btn" onclick="dn('s1',this)">✓ Step 1 완료 표시</button>
+      <span class="done-note">완료하면 사이드바 진행률이 올라갑니다</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ STEP 2 ══════ -->
+<div class="section" id="sec-s2">
+  <div class="sec-eyebrow">Step 2 / 6</div>
+  <div class="sec-title">🧠 LLM API — 두뇌 선택</div>
+  <div class="sec-desc">내 봇의 두뇌를 직접 고른다. <strong>처음이면 Gemini(무료) 강력 추천.</strong> 어떤 걸 골라도 나머지 구조는 동일하다.</div>
+
+  <div class="step-card open">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num alpha">A</div>
+      <div class="step-info"><h3>🟢 Gemini — 무료, 카드 불필요 (추천)</h3><p>구글 계정만 있으면 5분 완성</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t"><a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> 접속 → 구글 계정 로그인</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">왼쪽 메뉴 <strong>Get API key</strong> → <strong>Create API key</strong></div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">키 복사 → 형식: <span class="pg">AIzaSy...</span></div></div>
+      </div>
+      <div class="api-loc">
+        <div class="api-loc-label">Gemini API Key 재확인 위치</div>
+        <div class="api-loc-path">aistudio.google.com → 왼쪽 메뉴 → Get API key</div>
+        <div class="api-loc-note">분실해도 재확인 가능. 언제든 새 키 발급 가능.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num alpha">B</div>
+      <div class="step-info"><h3>🟡 Claude — 유료, 카드 필요</h3><p>console.anthropic.com</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → 회원가입 → 카드 등록</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">상단 <strong>API Keys</strong> → <strong>Create Key</strong> → 즉시 복사 (1회만 표시)</div></div>
+      </div>
+      <div class="api-loc">
+        <div class="api-loc-label">Claude API Key 확인 위치</div>
+        <div class="api-loc-path">console.anthropic.com → 상단 API Keys 탭</div>
+        <div class="api-loc-note">⚠ 생성 시 1회만 표시. 분실 시 새 키 발급 필요.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num alpha">C</div>
+      <div class="step-info"><h3>🟠 GPT — 유료, 카드 필요</h3><p>platform.openai.com</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t"><a href="https://platform.openai.com" target="_blank">platform.openai.com</a> → 회원가입 → 카드 등록</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">우측 상단 프로필 → <strong>API keys</strong> → <strong>Create new secret key</strong> → 즉시 복사</div></div>
+      </div>
+      <div class="api-loc">
+        <div class="api-loc-label">GPT API Key 확인 위치</div>
+        <div class="api-loc-path">platform.openai.com → 우측 상단 프로필 → API keys</div>
+        <div class="api-loc-note">⚠ 생성 시 1회만 표시. 분실 시 새 키 발급 필요.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="check-card">
+    <div class="check-card-title">✅ Step 2 완료 체크</div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">LLM 선택 완료 — Gemini / Claude / GPT 중 하나</div></div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">API Key 복사해서 메모장 저장 완료</div></div>
+    <div class="done-row"><button class="done-btn" onclick="dn('s2',this)">✓ Step 2 완료 표시</button></div>
+  </div>
+</div>
+
+<!-- ══════ STEP 3 ══════ -->
+<div class="section" id="sec-s3">
+  <div class="sec-eyebrow">Step 3 / 6</div>
+  <div class="sec-title">🤖 Dify — 에이전트 설정</div>
+  <div class="sec-desc">두뇌에 역할과 말투를 부여하는 플랫폼. 시스템 프롬프트를 여기에 작성한다. 각자 개인 계정으로 진행.</div>
+
+  <div class="banner purple"><div class="banner-i">🤖</div><div><strong>Dify에서 뭘 하는 건가?</strong> LLM(두뇌)은 아무 맥락 없이 대화한다. Dify에 "당신은 [이름]봇이고, 이런 역할입니다"를 설정하면 두뇌가 항상 그 역할로 답한다. 대화 흐름(맥락)도 여기서 기억해서 이전 대화를 이어갈 수 있게 해준다.</div></div>
+  <div class="banner info"><div class="banner-i">🎯</div><div>Dify에서 받아야 할 것 2가지: <strong>① Dify API Key</strong> (Cloudflare 환경변수에 입력) <strong>② API URL</strong> = <code>https://api.dify.ai/v1</code></div></div>
+
+  <div class="step-card open">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">1</div>
+      <div class="step-info"><h3>Dify 가입 + Agent 생성</h3><p>cloud.dify.ai</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t"><a href="https://cloud.dify.ai" target="_blank">cloud.dify.ai</a> → 구글 계정으로 가입</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">왼쪽 상단 <strong>+ 새로 만들기</strong> → <strong>에이전트(Agent)</strong> 선택</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">에이전트 이름: <strong>[내 이름]봇</strong> 입력</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">2</div>
+      <div class="step-info"><h3>LLM 연결 — Step 2 API Key 입력</h3><p>설정 → 모델 공급자</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">우측 상단 아바타 → <strong>설정</strong> → <strong>모델 공급자</strong></div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">내가 선택한 LLM 찾기 → <strong>Step 2 API Key 붙여넣기</strong> → 저장</div></div>
+      </div>
+      <div class="api-loc">
+        <div class="api-loc-label">LLM API Key 입력 위치 (Dify 내부)</div>
+        <div class="api-loc-path">Dify → 우측 상단 아바타 → 설정 → 모델 공급자 → 해당 LLM → API Key 입력</div>
+        <div class="api-loc-note">이 연결이 "몸통(Dify) ↔ 두뇌(LLM)"를 잇는 선이다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">3</div>
+      <div class="step-info"><h3>시스템 프롬프트 작성</h3><p>내 봇의 역할·말투·제한 정의. 왼쪽 "시스템 프롬프트 예시" 참고</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">에이전트 편집 화면 → <strong>지침(Instructions)</strong> 입력창 클릭</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">왼쪽 메뉴 <strong>"시스템 프롬프트 예시"</strong> 탭에서 템플릿 복사 후 본인 내용으로 수정</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">작성 완료 → <strong>게시</strong> 버튼 클릭</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">4</div>
+      <div class="step-info"><h3>Dify API Key 발급</h3><p>Cloudflare에 입력할 두 번째 키</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">에이전트 편집 화면 왼쪽 메뉴 → <strong>API 액세스</strong></div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t"><strong>API Key 생성</strong> → 복사 후 메모장 저장</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">API URL 확인: <span class="pg">https://api.dify.ai/v1</span> (기본값)</div></div>
+      </div>
+      <div class="api-loc">
+        <div class="api-loc-label">Dify API Key 확인 위치</div>
+        <div class="api-loc-path">Dify → 내 에이전트 → 왼쪽 메뉴 → API 액세스 → API Key</div>
+        <div class="api-loc-note">이 키를 다음 단계 Cloudflare 환경변수 DIFY_API_KEY에 입력한다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="check-card">
+    <div class="check-card-title">✅ Step 3 완료 체크</div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">Dify Agent 생성 + 시스템 프롬프트 게시 완료</div></div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">Dify API Key 복사 완료</div></div>
+    <div class="check-row"><div class="chk"></div><div><div class="chk-t">API URL 확인</div><div class="chk-s">https://api.dify.ai/v1</div></div></div>
+    <div class="done-row"><button class="done-btn" onclick="dn('s3',this)">✓ Step 3 완료 표시</button></div>
+  </div>
+</div>
+
+<!-- ══════ STEP 4 ══════ -->
+<div class="section" id="sec-s4">
+  <div class="sec-eyebrow">Step 4 / 6</div>
+  <div class="sec-title">⚡ Cloudflare Worker 배포</div>
+  <div class="sec-desc">봇의 실제 서버. AI가 짜준 코드를 붙여넣으면 즉시 URL이 생긴다. 이 URL이 내 봇의 주소다.</div>
+
+  <div class="banner info"><div class="banner-i">⚡</div><div><strong>Cloudflare에서 뭘 하는 건가?</strong> 텔레그램↔Dify는 직접 연결이 안 된다. Cloudflare Workers가 중간에서 24시간 연결해준다. 코드를 올리면 <code>[이름].workers.dev</code> URL이 생기고, 이 URL을 텔레그램에 등록하면 봇이 살아난다.</div></div>
+  <div class="banner purple"><div class="banner-i">📦</div><div><strong>KV(Key-Value Storage)가 뭔가?</strong> Cloudflare 안에 있는 간단한 저장소다. 예: <code>"권오혁" → "987654321"</code> 처럼 이름과 chat_id를 저장해두면, 봇이 "권오혁에게 전달해줘"라는 말을 들었을 때 KV에서 ID를 꺼내 메시지를 전달할 수 있다.</div></div>
+  <div class="banner warn"><div class="banner-i">⚠️</div><div>이 단계에서 <strong>환경변수 4개</strong>를 모두 입력해야 봇이 작동한다. Step 1~3에서 받은 값들을 준비하자.</div></div>
+
+  <div class="step-card open">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">1</div>
+      <div class="step-info"><h3>Cloudflare 가입 + Worker 생성</h3></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t"><a href="https://dash.cloudflare.com" target="_blank">dash.cloudflare.com</a> → 이메일로 회원가입</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">왼쪽 메뉴 <strong>Workers &amp; Pages</strong> → <strong>Create</strong> → <strong>Create Worker</strong></div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">Worker 이름: <strong>[내이름]-bot</strong> 예: <strong>dongyeon-bot</strong></div></div>
+        <div class="inst"><div class="inst-n">4</div><div class="inst-t"><strong>Deploy</strong> → URL 확인: <span class="pg">dongyeon-bot.workers.dev</span> → 메모장 저장</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">2</div>
+      <div class="step-info"><h3>KV Namespace 생성</h3><p>대화 맥락·chat_id 저장소</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">왼쪽 메뉴 <strong>Workers &amp; Pages → KV</strong> → <strong>Create a namespace</strong></div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">이름: <strong>BOT_KV</strong> → 생성</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">내 Worker → <strong>Settings → Bindings → Add → KV Namespace</strong> → 변수명 <code>BOT_KV</code>, 방금 만든 KV 선택 → 저장</div></div>
+      </div>
+      <div class="banner info"><div class="banner-i">💡</div><div>BOT_KV는 대화 맥락(conversation_id)과 관리자 ID를 저장한다. 이게 없으면 봇이 대화를 기억 못하고 항상 새 대화를 시작한다.</div></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">3</div>
+      <div class="step-info"><h3>worker.js 코드 붙여넣기</h3><p>왼쪽 "예시 코드" 또는 AI 생성 코드 사용</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">Worker 페이지 → <strong>Edit Code</strong></div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">기존 코드 전체 삭제 → 준비한 <strong>worker.js 붙여넣기</strong></div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">오른쪽 상단 <strong>Save and Deploy</strong></div></div>
+      </div>
+      <div class="banner tip"><div class="banner-i">📋</div><div>코드가 없으면 왼쪽 <strong>"AI 코드 생성 프롬프트"</strong> 탭의 프롬프트를 Claude/ChatGPT에 붙여넣어 생성하거나, <strong>"예시 코드(이동연A봇)"</strong> 탭의 코드를 복사해서 이름·역할만 수정해서 사용.</div></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">4</div>
+      <div class="step-info"><h3>환경변수 4개 입력 ← 가장 중요</h3><p>Settings → Variables and Secrets</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">Worker → 상단 <strong>Settings</strong> → <strong>Variables and Secrets → Add variable</strong></div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">아래 4개 차례로 입력</div></div>
+      </div>
+      <div class="api-loc">
+        <div class="api-loc-label">Cloudflare 환경변수 입력 위치</div>
+        <div class="api-loc-path">Worker → Settings → Variables and Secrets → Add variable</div>
+        <div class="api-loc-note">API Key 값은 절대 코드 안에 직접 쓰지 말 것. 반드시 여기에만 입력.</div>
+      </div>
+      <table class="gt" style="margin-top:12px;">
+        <thead><tr><th>변수명 (정확히 입력)</th><th>값</th><th>어디서 받았나</th></tr></thead>
+        <tbody>
+          <tr><td><code>TELEGRAM_BOT_TOKEN</code></td><td>123456789:AAxxxx...</td><td>Step 1 BotFather</td></tr>
+          <tr><td><code>DIFY_API_KEY</code></td><td>app-xxxxx...</td><td>Step 3 Dify API 액세스</td></tr>
+          <tr><td><code>DIFY_API_URL</code></td><td>https://api.dify.ai/v1</td><td>고정값 그대로</td></tr>
+          <tr><td><code>ADMIN_ID</code></td><td>숫자 ID</td><td>Step 1 @userinfobot</td></tr>
+        </tbody>
+      </table>
+      <div class="inst-list" style="margin-top:8px;">
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">입력 완료 → <strong>Save</strong> → <strong>Deploy</strong></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">5</div>
+      <div class="step-info"><h3>Webhook 등록</h3><p>텔레그램이 내 Worker로 메시지를 보내도록 설정</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">아래 URL을 <strong>브라우저 주소창에 직접 입력</strong> (대괄호 안을 본인 것으로 교체)</div></div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-fname">브라우저 주소창에 입력 (엔터)</span><button class="copy-btn" onclick="cp(this,'wh')">복사</button></div>
+        <div class="code-body"><pre id="wh">https://api.telegram.org/bot[텔레그램_토큰]/setWebhook?url=https://[워커이름].workers.dev</pre></div>
+      </div>
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">엔터 → <span class="pg">{"ok":true}</span> 응답 확인</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">텔레그램에서 내 봇 찾아서 <code>/관리자등록</code> 전송 → "완료" 응답 확인</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="check-card">
+    <div class="check-card-title">✅ Step 4 완료 체크</div>
+    <div class="check-row"><div class="chk"></div><div><div class="chk-t">Worker URL 생성 완료</div><div class="chk-s">[이름].workers.dev</div></div></div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">KV Namespace BOT_KV 생성 + Worker에 바인딩 완료</div></div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">환경변수 4개 입력 완료</div></div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">Webhook {"ok":true} 확인</div></div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">/관리자등록 전송 → 완료 응답 확인</div></div>
+    <div class="done-row"><button class="done-btn" onclick="dn('s4',this)">✓ Step 4 완료 표시</button></div>
+  </div>
+</div>
+
+<!-- ══════ STEP 5 ══════ -->
+<div class="section" id="sec-s5">
+  <div class="sec-eyebrow">Step 5 / 6</div>
+  <div class="sec-title">🐙 GitHub — 코드 저장</div>
+  <div class="sec-desc">worker.js를 안전하게 보관. 수정 전 버전으로 언제든 되돌리기 가능. 팀원 코드 참고 공간.</div>
+
+  <div class="banner info"><div class="banner-i">💡</div><div><strong>GitHub가 필요한 이유:</strong> Cloudflare에 코드를 올려도 수정·버전 관리가 어렵다. GitHub에 저장하면 ① 코드 분실 방지 ② "3일 전으로 되돌리기" ③ 팀원 코드 참고 ④ 나중에 Cloudflare 자동 배포 연결 가능.</div></div>
+
+  <div class="step-card open">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">1</div>
+      <div class="step-info"><h3>GitHub 가입 + 저장소 생성</h3></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t"><a href="https://github.com" target="_blank">github.com</a> → 회원가입</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">우측 상단 <strong>+</strong> → <strong>New repository</strong> → 이름: <strong>[내이름]-bot</strong> → <strong>Private</strong> → <strong>Create</strong></div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t"><strong>Add file → Create new file</strong> → 파일명: <span class="p">worker.js</span> → 코드 붙여넣기 → <strong>Commit changes</strong></div></div>
+      </div>
+      <div class="banner warn"><div class="banner-i">⚠️</div><div>API Key는 코드 안에 직접 쓰지 말 것. <code>env.TELEGRAM_BOT_TOKEN</code> 처럼 환경변수 참조만. 실제 값은 Cloudflare에만 저장.</div></div>
+    </div>
+  </div>
+
+  <div class="check-card">
+    <div class="check-card-title">✅ Step 5 완료 체크</div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">GitHub Private 저장소 생성 완료</div></div>
+    <div class="check-row"><div class="chk"></div><div class="chk-t">worker.js 업로드 완료</div></div>
+    <div class="done-row"><button class="done-btn" onclick="dn('s5',this)">✓ Step 5 완료 표시</button></div>
+  </div>
+</div>
+
+<!-- ══════ STEP 6 ══════ -->
+<div class="section" id="sec-s6">
+  <div class="sec-eyebrow">Step 6 / 6</div>
+  <div class="sec-title">🧪 테스트 & 완료</div>
+  <div class="sec-desc">내 봇에게 말을 걸어보고, 원하는 답이 나올 때까지 Dify 시스템 프롬프트를 수정한다.</div>
+
+  <div class="step-card open">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">1</div>
+      <div class="step-info"><h3>기본 동작 테스트</h3></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">텔레그램에서 내 봇에게 <strong>"안녕, 넌 누구야?"</strong> 전송</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">시스템 프롬프트대로 자기소개가 오면 성공</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">실제 업무 질문으로 추가 테스트</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">2</div>
+      <div class="step-info"><h3>프롬프트 튜닝</h3><p>마음에 안 들면 Dify에서 수정</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">Dify → 내 에이전트 → 지침 수정 → <strong>게시</strong></div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">텔레그램에서 다시 테스트 → 반복</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">보통 2~3회 수정이면 원하는 말투·역할 완성</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">3</div>
+      <div class="step-info"><h3>이동연 TL에게 정보 공유 ← 필수</h3><p>봇 간 연결을 위해 반드시 공유</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">카카오톡 또는 슬랙으로 아래 3가지 전달</div></div>
+      </div>
+      <table class="gt" style="margin-top:8px;">
+        <tbody>
+          <tr><td><strong>① 이름</strong></td><td>본인 이름</td></tr>
+          <tr><td><strong>② chat_id</strong></td><td>@userinfobot에서 확인한 숫자 ID</td></tr>
+          <tr><td><strong>③ Worker URL</strong></td><td>[이름]-bot.workers.dev</td></tr>
+        </tbody>
+      </table>
+      <div class="banner success"><div class="banner-i">✅</div><div>이 3가지가 모이면 이동연 TL이 KV에 라우팅 테이블을 등록 → 봇끼리 서로 연결된다.</div></div>
+    </div>
+  </div>
+
+  <div class="check-card" style="background:#eff6ff; border-color:#bfdbfe;">
+    <div class="check-card-title" style="color:#1e40af;">🎉 전체 완료!</div>
+    <div class="check-row"><div class="chk" style="border-color:#93c5fd;"></div><div class="chk-t">봇이 텔레그램에서 정상 응답</div></div>
+    <div class="check-row"><div class="chk" style="border-color:#93c5fd;"></div><div class="chk-t">이동연 TL에게 이름·chat_id·Worker URL 공유 완료</div></div>
+    <div class="done-row"><button class="done-btn" style="background:var(--accent);" onclick="dn('s6',this)">✓ Step 6 완료 표시</button></div>
+  </div>
+</div>
+
+<!-- ══════ 봇끼리 연결 ══════ -->
+<div class="section" id="sec-connect">
+  <div class="sec-eyebrow">Advanced</div>
+  <div class="sec-title">🔗 봇끼리 연결하기</div>
+  <div class="sec-desc">각자 봇 완성 후 이동연 TL이 KV 라우팅 테이블을 업데이트하면 봇 간 메시지 전달이 가능해진다.</div>
+
+  <div class="banner warn"><div class="banner-i">⚠️</div><div>이 단계는 <strong>이동연 TL이 주도</strong>한다. 구성원은 Step 6 완료 후 3가지 정보만 공유하면 끝.</div></div>
+
+  <!-- 구성원 할 일 -->
+  <div class="card" style="border-left: 4px solid var(--green);">
+    <div class="card-title">👤 구성원 각자가 할 것 — /관리자등록 + 정보 공유</div>
+    <div class="banner success" style="margin-bottom:14px;"><div class="banner-i">✅</div><div>봇 완성 직후 아래 2가지를 반드시 해야 한다. 이걸 해야 봇이 나를 주인으로 인식하고, 팀 전체 연결이 가능해진다.</div></div>
+    <table class="gt">
+      <thead><tr><th>순서</th><th>할 일</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>텔레그램에서 내 봇 찾기</td><td><code>@[내봇username]</code> 검색</td></tr>
+        <tr><td>2</td><td><code>/관리자등록</code> 전송</td><td>봇이 내 chat_id를 KV에 저장. "완료" 응답 오면 성공</td></tr>
+        <tr><td>3</td><td>이동연 TL에게 3가지 전달</td><td>① 이름 ② chat_id ③ Worker URL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔄 봇 간 연결 구조</div>
+    <div class="flow"><span class="fd">각자의 Cloudflare Worker URL = 각자 봇의 인터넷 주소</span>
+
+<span class="fo">이동연봇</span>  →  <span class="fd">dylee-ai-bot.workers.dev  (이동연 TL chat_id: KV에 등록)</span>
+<span class="fo">권오혁봇</span>  →  <span class="fd">ohyuk-bot.workers.dev    (권오혁 chat_id: KV에 등록)</span>
+<span class="fo">김민아봇</span>  →  <span class="fd">mina-bot.workers.dev     (김민아 TL chat_id: KV에 등록)</span>
+  ...
+
+<span class="fd">이동연 TL이 KV에 등록:</span>
+  <span class="fg">"권오혁"</span>  →  <span class="fg">chat_id: 987654321</span>
+  <span class="fg">"김민아"</span>  →  <span class="fg">chat_id: 111222333</span>
+
+<span class="fa">동연이 "권오혁에게 자료 요청해줘" 라고 하면:</span>
+  동연봇 Worker  →  "권오혁에게" 패턴 감지
+                →  KV에서 권오혁 chat_id 조회
+                →  텔레그램 API로 권오혁에게 메시지 발송</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 실제 시나리오 — 이동연 → 권오혁</div>
+    <div class="flow"><span class="fo">① 이동연</span> → 동연봇:  <span class="st">"권오혁에게 이번 주 리뷰 자료 보내달라 해줘"</span>
+      ↓
+<span class="fa">이동연봇 worker.js</span>  →  "권오혁에게" 감지  →  KV에서 chat_id 조회
+      ↓
+<span class="fo">② 권오혁 텔레그램</span>에 자동 알림:  <span class="st">"[이동연 TL 요청] 이번 주 리뷰 자료를 요청하셨습니다."</span>
+      ↓
+<span class="fo">③ 권오혁</span> → 권오혁봇:  <span class="st">"6R 리뷰 자료 요약해서 동연봇으로 보내줘"</span>
+      ↓
+<span class="fa">권오혁봇</span>  →  자료 요약  →  KV에서 이동연 chat_id 조회  →  전송
+      ↓
+<span class="fo">④ 이동연 텔레그램</span>에 요약 자료 자동 도착 ✅</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚙️ 이동연 TL이 할 작업 (구성원 완료 후)</div>
+    <table class="gt">
+      <thead><tr><th>순서</th><th>작업</th><th>위치</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>구성원 3가지 정보 수집 (이름·chat_id·URL)</td><td>카톡·슬랙</td></tr>
+        <tr><td>2</td><td>Cloudflare KV에 이름:chat_id 전체 등록</td><td>Workers & Pages → KV → 내 KV → Add entry</td></tr>
+        <tr><td>3</td><td>worker.js에 라우팅 로직 팀원 목록 업데이트</td><td>각 Worker Edit Code</td></tr>
+        <tr><td>4</td><td>전체 봇 테스트 — 봇 간 메시지 전달 확인</td><td>텔레그램</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════ 예시 코드 (이동연A봇) ══════ -->
+<div class="section" id="sec-code">
+  <div class="sec-eyebrow">Reference</div>
+  <div class="sec-title">📋 예시 코드 — 이동연(A)봇 worker.js</div>
+  <div class="sec-desc">실제 운영 중인 이동연(A)봇 코드. 이름·역할 부분만 바꾸면 본인 봇이 된다. 복사 후 Cloudflare에 붙여넣기.</div>
+
+  <div class="banner success"><div class="banner-i">✅</div><div>이 코드는 실제 검증된 코드다. <strong>API Key는 코드에 쓰지 않는다.</strong> 모두 Cloudflare 환경변수(Settings → Variables)에서 관리.</div></div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-fname">worker.js — 이동연(A)봇 전체 코드 (복사 후 이름·역할 수정)</span><button class="copy-btn" onclick="cp(this,'maincode')">전체 복사</button></div>
+    <div class="code-body"><pre id="maincode"><span class="cm">// ══════════════════════════════════════════════════
+// 이동연(A)봇 worker.js — Cloudflare Workers
+// 텔레그램 Webhook → Dify Agent → LLM 답변 반환
+// 봇 간 라우팅: "OOO에게 ~해줘" 패턴 처리
+// ══════════════════════════════════════════════════</span>
+
+<span class="kw">export default</span> {
+  <span class="kw">async</span> <span class="fn">fetch</span>(request, env) {
+    <span class="cm">// GET 요청 무시 (Webhook은 POST만 사용)</span>
+    <span class="kw">if</span> (request.method !== <span class="st">'POST'</span>) {
+      <span class="kw">return new</span> Response(<span class="st">'Bot is running'</span>);
+    }
+
+    <span class="kw">let</span> body;
+    <span class="kw">try</span> {
+      body = <span class="kw">await</span> request.json();
+    } <span class="kw">catch</span> {
+      <span class="kw">return new</span> Response(<span class="st">'OK'</span>);
+    }
+
+    <span class="kw">const</span> message = body.message;
+    <span class="kw">if</span> (!message) <span class="kw">return new</span> Response(<span class="st">'OK'</span>);
+
+    <span class="kw">const</span> chatId = message.chat.id.toString();
+    <span class="kw">const</span> text = message.text || <span class="st">''</span>;
+
+    <span class="cm">// ① /관리자등록 — 처음 한 번 실행해서 내 chat_id를 KV에 저장</span>
+    <span class="kw">if</span> (text === <span class="st">'/관리자등록'</span>) {
+      <span class="kw">await</span> env.BOT_KV.put(<span class="st">'admin_id'</span>, chatId);
+      <span class="kw">await</span> <span class="fn">sendMsg</span>(chatId, <span class="st">'✅ 이동연봇 관리자 등록 완료.\n이제 명령을 내릴 수 있습니다.'</span>, env);
+      <span class="kw">return new</span> Response(<span class="st">'OK'</span>);
+    }
+
+    <span class="cm">// ② 권한 확인 — 등록된 관리자만 처리</span>
+    <span class="kw">const</span> adminId = <span class="kw">await</span> env.BOT_KV.get(<span class="st">'admin_id'</span>);
+    <span class="kw">if</span> (!adminId || chatId !== adminId) {
+      <span class="kw">return new</span> Response(<span class="st">'OK'</span>); <span class="cm">// 등록되지 않은 사용자 무시</span>
+    }
+
+    <span class="cm">// ③ 파일(문서) 처리 — "요약" 키워드와 함께 파일 전송 시</span>
+    <span class="kw">if</span> (message.document) {
+      <span class="kw">const</span> caption = message.caption || <span class="st">''</span>;
+      <span class="kw">if</span> (caption.includes(<span class="st">'요약'</span>)) {
+        <span class="kw">await</span> <span class="fn">sendMsg</span>(chatId, <span class="st">'📄 파일 받았습니다. 요약 중...'</span>, env);
+        <span class="kw">const</span> fileText = <span class="kw">await</span> <span class="fn">getFileText</span>(message.document, env);
+        <span class="kw">if</span> (fileText) {
+          <span class="kw">const</span> reply = <span class="kw">await</span> <span class="fn">callDify</span>(
+            <span class="st">`다음 문서를 핵심만 3~5줄로 요약해줘:\n\n${fileText}`</span>, chatId, env
+          );
+          <span class="kw">await</span> <span class="fn">sendMsg</span>(chatId, reply, env);
+        } <span class="kw">else</span> {
+          <span class="kw">await</span> <span class="fn">sendMsg</span>(chatId, <span class="st">'❌ 파일을 읽을 수 없습니다. 텍스트로 내용을 붙여넣어 주세요.'</span>, env);
+        }
+      } <span class="kw">else</span> {
+        <span class="kw">await</span> <span class="fn">sendMsg</span>(chatId, <span class="st">'📎 파일을 받았습니다. "요약"이라고 캡션을 달아서 다시 보내주세요.'</span>, env);
+      }
+      <span class="kw">return new</span> Response(<span class="st">'OK'</span>);
+    }
+
+    <span class="cm">// ④ "OOO에게 ~해줘" 패턴 — 다른 팀원에게 메시지 전달</span>
+    <span class="cm">// KV에 저장된 팀원 chat_id로 텔레그램 메시지 발송</span>
+    <span class="kw">const</span> teamMembers = [
+      <span class="st">'권오혁'</span>, <span class="st">'구정모'</span>, <span class="st">'김민아'</span>, <span class="st">'황성욱'</span>,
+      <span class="st">'이기두'</span>, <span class="st">'위예슬'</span>, <span class="st">'홍석윤'</span>, <span class="st">'성봉구'</span>, <span class="st">'염성진'</span>
+    ];
+
+    <span class="kw">for</span> (<span class="kw">const</span> member <span class="kw">of</span> teamMembers) {
+      <span class="kw">if</span> (text.includes(<span class="st">`${member}에게`</span>) || text.includes(<span class="st">`${member}한테`</span>)) {
+        <span class="kw">const</span> targetId = <span class="kw">await</span> env.BOT_KV.get(<span class="st">`chatid_${member}`</span>);
+        <span class="kw">if</span> (targetId) {
+          <span class="kw">const</span> fwdMsg = <span class="st">`📩 [이동연 TL 요청]\n${text}\n\n— 이동연봇이 전달함`</span>;
+          <span class="kw">await</span> <span class="fn">sendMsg</span>(targetId, fwdMsg, env);
+          <span class="kw">await</span> <span class="fn">sendMsg</span>(chatId, <span class="st">`✅ ${member}님께 메시지를 전달했습니다.`</span>, env);
+        } <span class="kw">else</span> {
+          <span class="kw">await</span> <span class="fn">sendMsg</span>(chatId, <span class="st">`⚠️ ${member}님의 봇이 아직 연결되지 않았습니다.`</span>, env);
+        }
+        <span class="kw">return new</span> Response(<span class="st">'OK'</span>);
+      }
+    }
+
+    <span class="cm">// ⑤ 일반 질문 → Dify Agent 호출</span>
+    <span class="kw">const</span> reply = <span class="kw">await</span> <span class="fn">callDify</span>(text, chatId, env);
+    <span class="kw">await</span> <span class="fn">sendMsg</span>(chatId, reply, env);
+    <span class="kw">return new</span> Response(<span class="st">'OK'</span>);
+  }
+};
+
+<span class="cm">// ── Dify API 호출 (대화 맥락 유지) ──────────────────</span>
+<span class="kw">async function</span> <span class="fn">callDify</span>(userMessage, chatId, env) {
+  <span class="kw">try</span> {
+    <span class="cm">// KV에서 이전 conversation_id 가져오기 (대화 맥락 유지)</span>
+    <span class="kw">const</span> convId = <span class="kw">await</span> env.BOT_KV.get(<span class="st">`conv_${chatId}`</span>);
+
+    <span class="kw">const</span> payload = {
+      inputs: {},
+      query: userMessage,
+      response_mode: <span class="st">'blocking'</span>,
+      user: <span class="st">`telegram_${chatId}`</span>,
+    };
+    <span class="kw">if</span> (convId) payload.conversation_id = convId;
+
+    <span class="kw">const</span> res = <span class="kw">await</span> fetch(
+      <span class="st">`${env.DIFY_API_URL}/chat-messages`</span>,
+      {
+        method: <span class="st">'POST'</span>,
+        headers: {
+          <span class="st">'Authorization'</span>: <span class="st">`Bearer ${env.DIFY_API_KEY}`</span>,
+          <span class="st">'Content-Type'</span>: <span class="st">'application/json'</span>,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    <span class="kw">if</span> (!res.ok) {
+      <span class="kw">const</span> errText = <span class="kw">await</span> res.text();
+      console.error(<span class="st">'Dify error:'</span>, errText);
+      <span class="kw">return</span> <span class="st">'⚠️ AI 응답 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'</span>;
+    }
+
+    <span class="kw">const</span> data = <span class="kw">await</span> res.json();
+
+    <span class="cm">// 새 conversation_id를 KV에 저장 (다음 대화에서 맥락 유지)</span>
+    <span class="kw">if</span> (data.conversation_id) {
+      <span class="kw">await</span> env.BOT_KV.put(<span class="st">`conv_${chatId}`</span>, data.conversation_id);
+    }
+
+    <span class="kw">return</span> data.answer || <span class="st">'응답을 받지 못했습니다.'</span>;
+  } <span class="kw">catch</span> (e) {
+    console.error(<span class="st">'callDify error:'</span>, e);
+    <span class="kw">return</span> <span class="st">'⚠️ 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'</span>;
+  }
+}
+
+<span class="cm">// ── 텔레그램 메시지 전송 ─────────────────────────────</span>
+<span class="kw">async function</span> <span class="fn">sendMsg</span>(chatId, text, env) {
+  <span class="kw">await</span> fetch(
+    <span class="st">`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`</span>,
+    {
+      method: <span class="st">'POST'</span>,
+      headers: { <span class="st">'Content-Type'</span>: <span class="st">'application/json'</span> },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: text,
+        parse_mode: <span class="st">'HTML'</span>, <span class="cm">// &lt;b&gt;굵게&lt;/b&gt; 등 HTML 태그 허용</span>
+      }),
+    }
+  );
+}
+
+<span class="cm">// ── 파일 텍스트 추출 (텍스트 파일 한정) ─────────────</span>
+<span class="kw">async function</span> <span class="fn">getFileText</span>(doc, env) {
+  <span class="kw">try</span> {
+    <span class="cm">// 텔레그램에서 파일 경로 획득</span>
+    <span class="kw">const</span> fileRes = <span class="kw">await</span> fetch(
+      <span class="st">`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getFile?file_id=${doc.file_id}`</span>
+    );
+    <span class="kw">const</span> fileData = <span class="kw">await</span> fileRes.json();
+    <span class="kw">const</span> filePath = fileData.result?.file_path;
+    <span class="kw">if</span> (!filePath) <span class="kw">return null</span>;
+
+    <span class="cm">// 파일 다운로드</span>
+    <span class="kw">const</span> fileUrl = <span class="st">`https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${filePath}`</span>;
+    <span class="kw">const</span> fileContent = <span class="kw">await</span> fetch(fileUrl);
+    <span class="kw">const</span> buffer = <span class="kw">await</span> fileContent.arrayBuffer();
+
+    <span class="cm">// 텍스트 파일만 처리 (PDF 파싱은 외부 서비스 필요)</span>
+    <span class="kw">const</span> mimeType = doc.mime_type || <span class="st">''</span>;
+    <span class="kw">if</span> (mimeType.includes(<span class="st">'text'</span>) || mimeType.includes(<span class="st">'plain'</span>)) {
+      <span class="kw">return new</span> TextDecoder(<span class="st">'utf-8'</span>).decode(buffer);
+    }
+    <span class="kw">return null</span>; <span class="cm">// PDF·PPTX는 현재 미지원 → 텍스트 붙여넣기 안내</span>
+  } <span class="kw">catch</span> {
+    <span class="kw">return null</span>;
+  }
+}</pre></div>
+  </div>
+
+  <div class="banner info"><div class="banner-i">✏️</div><div><strong>본인 봇으로 바꾸려면:</strong> ① <code>이동연 TL 요청</code> → 본인 이름으로 변경 ② <code>이동연봇</code> → 본인 봇 이름으로 변경 ③ 시스템 프롬프트는 Dify에서 설정 — 코드 수정 불필요</div></div>
+</div>
+
+<!-- ══════ AI 코드 생성 프롬프트 ══════ -->
+<div class="section" id="sec-prompt">
+  <div class="sec-eyebrow">Reference</div>
+  <div class="sec-title">✍️ AI 코드 생성 프롬프트</div>
+  <div class="sec-desc">Claude나 ChatGPT에 아래 프롬프트를 복붙하면 내 봇 worker.js가 완성된다. 코딩 경험 불필요.</div>
+
+  <div class="banner success"><div class="banner-i">🎯</div><div>코딩 경험 없어도 된다. 아래 프롬프트를 AI에게 복붙하면 완성 코드가 나온다. 받은 코드를 Cloudflare에 그대로 붙여넣으면 된다.</div></div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-fname">Claude / ChatGPT에 복붙할 프롬프트</span><button class="copy-btn" onclick="cp(this,'aiprompt')">복사</button></div>
+    <div class="code-body"><pre id="aiprompt">나는 텔레그램 AI 비서봇을 만들려고 해.
+아래 스펙으로 Cloudflare Workers용 worker.js를 완성해줘.
+
+[스택]
+- 채널: 텔레그램 (Webhook 방식)
+- 서버: Cloudflare Workers
+- AI 플랫폼: Dify API
+- 두뇌: [Gemini / Claude / GPT 중 선택]
+
+[내 봇 정보]
+- 봇 이름: [이름]봇  예: 황성욱봇
+- 내 이름: [이름]  예: 황성욱
+- 내 역할/팀: [예: 6R Comm 전략팀 TL, 콘텐츠 기획 담당]
+- 말투: [예: 간결하고 전문적인 비서 톤]
+
+[필수 기능]
+1. /관리자등록 명령어: 처음 한 번 실행하면 내 chat_id를 KV에 저장 (관리자 등록)
+2. 권한 확인: KV에 등록된 관리자만 봇 사용 가능
+3. 일반 질문 → Dify API(chat-messages) 호출 → 답변 반환
+4. Dify conversation_id를 KV에 저장해서 대화 맥락 유지
+5. "OOO에게 ~해줘" / "OOO한테 ~해줘" 패턴 → KV에서 chatid_OOO 조회 → 텔레그램으로 전달
+6. 파일 + "요약" 캡션 → 텍스트 파일이면 텍스트 추출 후 Dify에 요약 요청
+7. 처리 실패 시 친절한 한국어 안내 메시지
+8. 모든 에러는 try-catch로 처리, console.error로 로그
+
+[팀원 목록 — 봇 간 라우팅 대상]
+이동연, 권오혁, 구정모, 김민아, 황성욱, 이기두, 위예슬, 홍석윤, 성봉구
+
+[환경변수 — 코드에 직접 값 쓰지 말고 env. 으로만 참조]
+env.TELEGRAM_BOT_TOKEN  — 텔레그램 봇 토큰
+env.DIFY_API_KEY        — Dify API Key
+env.DIFY_API_URL        — Dify API URL (https://api.dify.ai/v1)
+env.BOT_KV              — Cloudflare KV Namespace (이미 바인딩됨)
+
+Cloudflare Workers에서 즉시 실행 가능한 완전한 worker.js
+단일 파일로 만들어줘. 주석은 한국어로.</pre></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 코드 받은 후 할 일</div>
+    <table class="gt">
+      <thead><tr><th>#</th><th>할 일</th><th>위치</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>받은 코드 전체 복사</td><td>AI 응답창</td></tr>
+        <tr><td>2</td><td>Cloudflare Worker → Edit Code → 기존 코드 삭제 → 붙여넣기</td><td>dash.cloudflare.com</td></tr>
+        <tr><td>3</td><td>Save and Deploy</td><td>Cloudflare</td></tr>
+        <tr><td>4</td><td>환경변수 4개 입력 (Settings → Variables)</td><td>Cloudflare</td></tr>
+        <tr><td>5</td><td>Webhook 등록 URL 브라우저에 입력</td><td>주소창</td></tr>
+        <tr><td>6</td><td>/관리자등록 전송</td><td>텔레그램 앱</td></tr>
+        <tr><td>7</td><td>"안녕, 넌 누구야?" 테스트</td><td>텔레그램 앱</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════ 시스템 프롬프트 예시 ══════ -->
+<div class="section" id="sec-syspt">
+  <div class="sec-eyebrow">Reference</div>
+  <div class="sec-title">💬 시스템 프롬프트 예시</div>
+  <div class="sec-desc">Dify 에이전트의 지침(Instructions)에 붙여넣는 내용. 이게 내 봇의 성격과 역할을 결정한다.</div>
+
+  <div class="banner info"><div class="banner-i">💡</div><div>시스템 프롬프트 = 봇에게 내리는 역할 지시서. 처음에는 아래 템플릿을 복사해서 본인 이름·역할만 바꾸면 된다. 봇이 마음에 안 들면 Dify에서 언제든 수정·게시.</div></div>
+
+  <div class="card">
+    <div class="card-title">📄 기본 템플릿 — 복사 후 수정</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-fname">Dify → 지침(Instructions)에 붙여넣기</span><button class="copy-btn" onclick="cp(this,'spt')">복사</button></div>
+      <div class="code-body"><pre id="spt">당신은 [이름]님의 전담 AI 비서입니다.
+
+[팀 구성]
+- AI Comm 기획팀: 구정모 팀장 / 홍석윤 TL / 이동연 TL
+- 6R Comm 전략팀: 성봉구 팀장 / 김민아 TL / 황성욱 TL / 이기두 TL / 위예슬 TL
+- 사장님: 염성진
+
+[나의 역할 및 담당 업무]
+- [여기에 본인 업무·담당 내용 입력]
+- 예: 6R Comm 전략팀 TL / 콘텐츠 전략 기획 / 주간 보고 작성
+
+[답변 원칙]
+- 불필요한 인사말 없이 바로 핵심 답변
+- 마크다운 기호(*, #, ``` 등) 없이 깔끔한 텍스트
+- 모르는 내용은 솔직하게 "확인이 필요한 내용입니다" 로 답변
+- 간결하고 신뢰감 있는 전문 비서 톤 유지
+- 업무 관련 요청은 구체적이고 실행 가능한 답변 제공</pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💼 이동연(A)봇 실제 시스템 프롬프트 예시</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-fname">이동연(A)봇 실제 사용 프롬프트</span><button class="copy-btn" onclick="cp(this,'dyspt')">복사</button></div>
+      <div class="code-body"><pre id="dyspt">당신은 이동연 TL의 전담 AI 비서입니다.
+
+[조직 정보]
+- AI Comm 기획팀: 구정모 팀장 / 홍석윤 TL / 이동연 TL
+- 6R Comm 전략팀: 성봉구 팀장 / 김민아 TL / 황성욱 TL / 이기두 TL / 위예슬 TL
+- 사장님: 염성진
+
+[이동연 TL 역할]
+- AI Comm 기획팀 TL
+- 팀 AI 도구 도입 및 실험 담당
+- 구성원 AI 봇 시스템 설계 및 운영
+
+[답변 원칙]
+- 불필요한 인사말 없이 바로 핵심 답변
+- 마크다운 없이 깔끔한 텍스트
+- 업무 효율화 관점에서 실행 가능한 답변 우선
+- 모르면 솔직하게 "확인이 필요합니다" 로 답변
+- 간결하고 신뢰감 있는 비서 톤</pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔧 프롬프트 튜닝 팁</div>
+    <table class="gt">
+      <thead><tr><th>원하는 결과</th><th>추가할 내용</th></tr></thead>
+      <tbody>
+        <tr><td>더 짧게 답하게</td><td><code>답변은 3줄 이내로 요약</code> 추가</td></tr>
+        <tr><td>특정 형식으로</td><td><code>항상 번호 목록으로 정리</code> 추가</td></tr>
+        <tr><td>특정 주제만</td><td><code>업무 외 질문은 정중히 거절</code> 추가</td></tr>
+        <tr><td>더 따뜻한 톤</td><td><code>친근하고 따뜻한 말투로, 존댓말 사용</code> 추가</td></tr>
+        <tr><td>전문 용어 사용</td><td><code>마케팅·광고 전문 용어를 적절히 사용</code> 추가</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════ FAQ ══════ -->
+<div class="section" id="sec-faq">
+  <div class="sec-eyebrow">Troubleshooting</div>
+  <div class="sec-title">❓ 막혔을 때 (FAQ)</div>
+  <div class="sec-desc">실습 중 막히면 여기서 먼저 확인. 해결 안 되면 Cloudflare Logs에서 에러를 복사해서 Claude/ChatGPT에게 "이 에러 고쳐줘"라고 붙여넣자.</div>
+
+  <div class="step-card open">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num alpha">Q</div>
+      <div class="step-info"><h3>봇에게 말했는데 아무 반응이 없어요</h3></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <table class="gt">
+        <tbody>
+          <tr><td><strong>체크 1</strong></td><td>Webhook 등록했나? → setWebhook URL을 브라우저에 다시 입력</td></tr>
+          <tr><td><strong>체크 2</strong></td><td>/관리자등록 전송했나? → 처음 한 번은 반드시 해야 함</td></tr>
+          <tr><td><strong>체크 3</strong></td><td>환경변수 4개 모두 입력됐나? → Worker → Settings → Variables 확인</td></tr>
+          <tr><td><strong>체크 4</strong></td><td>KV Namespace BOT_KV가 Worker에 바인딩됐나? → Settings → Bindings 확인</td></tr>
+          <tr><td><strong>체크 5</strong></td><td>Cloudflare → Worker → Logs 탭에서 에러 메시지 확인</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num alpha">Q</div>
+      <div class="step-info"><h3>Dify에서 LLM 모델이 안 보여요</h3></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <table class="gt">
+        <tbody>
+          <tr><td><strong>원인</strong></td><td>모델 공급자에 API Key 미입력 또는 잘못 입력</td></tr>
+          <tr><td><strong>해결</strong></td><td>Dify → 우측상단 아바타 → 설정 → 모델 공급자 → 해당 LLM → API Key 재입력</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num alpha">Q</div>
+      <div class="step-info"><h3>Cloudflare에서 500 에러 / 오류 발생</h3></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <table class="gt">
+        <tbody>
+          <tr><td><strong>1</strong></td><td>Worker → Logs 탭 → 에러 메시지 전체 복사</td></tr>
+          <tr><td><strong>2</strong></td><td>Claude/ChatGPT에 "worker.js 코드와 이 에러를 보여줄게, 고쳐줘" 요청</td></tr>
+          <tr><td><strong>3</strong></td><td>환경변수명 오타 확인 — 대소문자·언더바 주의 (TELEGRAM_BOT_TOKEN 정확히)</td></tr>
+          <tr><td><strong>4</strong></td><td>BOT_KV 바인딩이 코드의 <code>env.BOT_KV</code>와 변수명이 일치하는지 확인</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num alpha">Q</div>
+      <div class="step-info"><h3>BotFather에서 username이 이미 사용 중이래요</h3></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <table class="gt">
+        <tbody>
+          <tr><td><strong>원인</strong></td><td>전 세계에서 유일한 username이어야 함</td></tr>
+          <tr><td><strong>해결</strong></td><td>이름 뒤에 숫자·팀명 추가 예: <code>hwang_6r_bot</code>, <code>sgwook_aicomm_bot</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num alpha">Q</div>
+      <div class="step-info"><h3>API Key를 잃어버렸어요</h3></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <table class="gt">
+        <tbody>
+          <tr><td><strong>Gemini</strong></td><td>aistudio.google.com → Get API key에서 재확인 또는 새 키 발급</td></tr>
+          <tr><td><strong>Claude</strong></td><td>console.anthropic.com → API Keys → 새 키 발급 (기존 키 재확인 불가)</td></tr>
+          <tr><td><strong>GPT</strong></td><td>platform.openai.com → API keys → 새 키 발급</td></tr>
+          <tr><td><strong>Dify</strong></td><td>Dify → 내 에이전트 → API 액세스에서 재확인 가능</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num alpha">Q</div>
+      <div class="step-info"><h3>봇이 이전 대화를 기억 못해요 (매번 처음부터)</h3></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <table class="gt">
+        <tbody>
+          <tr><td><strong>원인</strong></td><td>KV에 conversation_id가 저장 안 되거나, BOT_KV 바인딩 누락</td></tr>
+          <tr><td><strong>해결 1</strong></td><td>Worker → Settings → Bindings에서 BOT_KV가 있는지 확인</td></tr>
+          <tr><td><strong>해결 2</strong></td><td>코드에서 <code>env.BOT_KV.put</code> / <code>env.BOT_KV.get</code>이 제대로 작성됐는지 확인</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- 푸터 -->
+<div style="padding: 20px 60px 32px; border-top: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background: var(--surface2);">
+  <div>
+    <div style="font-size:12px; color:var(--text-dim); margin-bottom:3px;">6R전략 담당 구성원 AI비서봇 생성 가이드</div>
+    <div style="font-size:13px; color:var(--text);">제작 <strong style="color:var(--accent)">이동연 TL</strong> <span style="color:var(--text-dim)">· AI Comm 기획팀</span></div>
+  </div>
+  <div style="text-align:right;">
+    <div style="font-size:12px; color:var(--text-dim); margin-bottom:3px;">궁금한 점·막히는 부분 문의</div>
+    <div style="font-size:13px;"><a href="https://t.me/dylee_ai_bot" target="_blank" style="color:var(--accent); font-weight:700;">텔레그램 @dylee_ai_bot</a> <span style="color:var(--text-dim)">또는 이동연 TL에게 직접</span></div>
+  </div>
+</div>
+</main>
+
+<script>
+function go(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  el.classList.add('active');
+  document.querySelector('.main').scrollTo(0, 0);
+}
+function tog(hd) { hd.parentElement.classList.toggle('open'); }
+const doneMap = {};
+function dn(step, btn) {
+  if (doneMap[step]) {
+    doneMap[step] = false;
+    btn.textContent = '✓ Step ' + step.replace('s','') + ' 완료 표시';
+    btn.classList.remove('undone');
+    const b = document.getElementById('b-' + step);
+    if (b) { b.textContent = '시작'; b.className = 'nb'; }
+  } else {
+    doneMap[step] = true;
+    btn.textContent = '↩ 완료 취소';
+    btn.classList.add('undone');
+    const b = document.getElementById('b-' + step);
+    if (b) { b.textContent = '완료'; b.className = 'nb done'; }
+  }
+  const count = Object.values(doneMap).filter(Boolean).length;
+  document.getElementById('prog-txt').textContent = count + ' / 6';
+  document.getElementById('prog-fill').style.width = (count / 6 * 100) + '%';
+}
+function cp(btn, id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    btn.textContent = '✓ 복사됨';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
