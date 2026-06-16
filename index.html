@@ -81,6 +81,18 @@
     font-size: 14px;
     color: #7ba4c8;
   }
+  .cover-cta {
+    display: inline-block;
+    margin: 28px 0 24px;
+    padding: 13px 26px;
+    background: #fff;
+    color: var(--accent);
+    font-size: 15px; font-weight: 700;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .cover-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
 
   /* 플로우 */
   .flow { display: flex; flex-direction: column; gap: 0; }
@@ -202,6 +214,7 @@
   <h1>권오혁 비서봇<br>운영 가이드</h1>
   <div class="divider"></div>
   <p class="desc">텔레그램 기반 AI 비서봇의 구조와 기능을 정리한 운영 참고 문서입니다.</p>
+  <a class="cover-cta" href="guide.html">상세 구축 가이드 보기 →</a>
   <div class="meta">2026. 6. 17</div>
 </section>
 
@@ -364,6 +377,14 @@
       <td>중앙 구축 완료 후</td>
     </tr>
   </table>
+</section>
+
+<!-- 상세 가이드 링크 -->
+<section class="page" style="text-align:center;">
+  <div class="page-label">상세 가이드</div>
+  <h2>처음부터 직접 구축하기</h2>
+  <p class="desc" style="margin:0 auto 28px;">텔레그램 봇 생성부터 Cloudflare 배포, worker.js 코드 구조, 트러블슈팅까지 단계별 전체 가이드입니다.</p>
+  <a class="cover-cta" href="guide.html" style="background:var(--accent); color:#fff;">상세 구축 가이드 열기 →</a>
 </section>
 
 </body>
