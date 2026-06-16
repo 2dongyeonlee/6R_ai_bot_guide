@@ -3,586 +3,1131 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>권오혁 비서봇 운영 가이드</title>
+<title>AI 비서봇 운영·구축 가이드</title>
 <style>
-  :root {
-    --ink: #1a2533;
-    --ink-mid: #4a5a6b;
-    --ink-soft: #7a8c9e;
-    --line: #e2e8ef;
-    --bg: #f7f9fb;
-    --card: #ffffff;
-    --accent: #1a4a8a;
-    --accent-light: #edf2fa;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    line-height: 1.65;
-    -webkit-font-smoothing: antialiased;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
-  .page {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 56px 44px;
-    border-bottom: 1px solid var(--line);
-  }
-  .page:last-child { border-bottom: none; }
+:root {
+  --bg: #f5f0e8;
+  --sidebar-bg: #2c2c38;
+  --surface: #ffffff;
+  --surface2: #f9f6f0;
+  --border: #e2d9cc;
+  --border-light: #ede8e0;
+  --accent: #2a5caa;
+  --accent2: #7c4dbd;
+  --accent3: #1a7a4a;
+  --accent4: #c05c00;
+  --text: #1a1a2e;
+  --text-dim: #5a5a7a;
+  --text-bright: #0d0d1a;
+  --code-bg: #1e1e2e;
+  --sidebar-width: 260px;
+  --green: #1a7a4a;
+  --orange: #c05c00;
+  --red: #b91c1c;
+  --sidebar-text: #b0b0c8;
+  --sidebar-active: #ffffff;
+  --sidebar-accent: #7eb3ff;
+}
 
-  /* 헤더 */
-  .page-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 14px;
-  }
-  h1 {
-    font-size: 34px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-    margin-bottom: 14px;
-  }
-  h2 {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    margin-bottom: 10px;
-  }
-  .desc {
-    font-size: 16px;
-    color: var(--ink-mid);
-    max-width: 620px;
-    margin-bottom: 36px;
-  }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
 
-  /* 표지 */
-  .cover {
-    background: var(--accent);
-    color: #fff;
-    padding: 72px 44px;
-  }
-  .cover .page-label { color: #a0bce0; letter-spacing: 0.14em; }
-  .cover h1 { color: #fff; font-size: 38px; margin-bottom: 16px; }
-  .cover .desc { color: #a8c0d8; margin-bottom: 0; }
-  .cover .divider {
-    width: 40px; height: 3px;
-    background: #a0bce0;
-    border-radius: 2px;
-    margin: 28px 0;
-  }
-  .cover .meta {
-    font-size: 14px;
-    color: #7ba4c8;
-  }
-  .cover-cta {
-    display: inline-block;
-    margin: 28px 0 24px;
-    padding: 13px 26px;
-    background: #fff;
-    color: var(--accent);
-    font-size: 15px; font-weight: 700;
-    border-radius: 10px;
-    text-decoration: none;
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .cover-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  font-size: 15px;
+  line-height: 1.7;
+}
 
-  /* 플로우 */
-  .flow { display: flex; flex-direction: column; gap: 0; }
-  .step {
-    display: grid;
-    grid-template-columns: 48px 1fr;
-    gap: 20px;
-    align-items: start;
-    padding-bottom: 24px;
-    position: relative;
-  }
-  .step:not(:last-child)::before {
-    content: "";
-    position: absolute;
-    left: 23px; top: 48px; bottom: 0;
-    width: 2px;
-    background: var(--line);
-  }
-  .step-num {
-    width: 46px; height: 46px;
-    background: var(--accent);
-    color: #fff;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 17px; font-weight: 700;
-    flex-shrink: 0;
-    z-index: 1;
-  }
-  .step-body h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; padding-top: 10px; }
-  .step-body p { font-size: 14px; color: var(--ink-mid); }
-  .chip {
-    display: inline-block;
-    margin-top: 8px;
-    font-size: 12px; font-weight: 600;
-    color: var(--accent);
-    background: var(--accent-light);
-    padding: 3px 10px;
-    border-radius: 6px;
-  }
+/* ── 사이드바 ── */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  border-right: 1px solid #3a3a4e;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar::-webkit-scrollbar { width:3px; }
+.sidebar::-webkit-scrollbar-thumb { background:#4a4a60; }
 
-  /* 스택 */
-  .stack {
-    display: flex; flex-wrap: wrap;
-    gap: 8px; align-items: center;
-    margin: 32px 0 0;
-    padding: 20px 22px;
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-  }
-  .stack span {
-    font-size: 14px; font-weight: 600;
-    padding: 6px 14px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-  }
-  .stack .arr { color: var(--ink-soft); font-size: 16px; }
+.sidebar-header {
+  padding: 24px 20px 18px;
+  border-bottom: 1px solid #3a3a4e;
+  flex-shrink: 0;
+}
+.s-logo {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--sidebar-accent);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.s-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--sidebar-active);
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+.s-meta {
+  padding-top: 10px;
+  border-top: 1px solid #3a3a4e;
+}
+.s-meta-row { font-size: 11px; color: var(--sidebar-text); line-height: 1.8; }
+.s-meta-row strong { color: #d0d8f0; }
+.s-meta-link { font-size: 11px; color: var(--sidebar-accent); margin-top:4px; display:block; }
 
-  /* 기능 그리드 */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-  }
-  .feat {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 20px 20px 18px;
-  }
-  .feat h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-  .feat p { font-size: 14px; color: var(--ink-mid); line-height: 1.55; }
-  .feat .ex {
-    margin-top: 12px;
-    font-size: 13px;
-    background: var(--bg);
-    border: 1px dashed var(--line);
-    border-radius: 8px;
-    padding: 8px 12px;
-    color: var(--ink-mid);
-    font-style: italic;
-  }
+.s-group-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: #4a4a60;
+  text-transform: uppercase;
+  padding: 18px 20px 7px;
+}
 
-  /* 표 */
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th {
-    font-size: 11px; text-transform: uppercase;
-    letter-spacing: 0.06em; color: var(--ink-soft);
-    border-bottom: 2px solid var(--line);
-  }
-  td:first-child { font-weight: 600; white-space: nowrap; }
-  td small { display: block; color: var(--ink-soft); font-size: 12px; margin-top: 2px; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  color: var(--sidebar-text);
+  font-size: 13px;
+  font-weight: 400;
+  transition: all 0.12s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.nav-item:hover { background: rgba(255,255,255,0.05); color: #e0e0f0; }
+.nav-item.active {
+  background: rgba(126,179,255,0.12);
+  border-left-color: var(--sidebar-accent);
+  color: var(--sidebar-active);
+  font-weight: 600;
+}
+.nav-item .ni { font-size: 14px; flex-shrink:0; width:18px; text-align:center; }
+.nav-item .nb {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: rgba(126,179,255,0.2);
+  color: var(--sidebar-accent);
+  flex-shrink: 0;
+}
+.nav-item .nb.done { background: rgba(26,122,74,0.3); color: #6ee7a0; }
+.nav-item .nb.new { background: rgba(192,92,0,0.3); color: #fbbf24; }
 
-  /* 노트 */
-  .note {
-    margin-top: 24px;
-    background: var(--accent-light);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 10px 10px 0;
-    padding: 14px 18px;
-    font-size: 14px;
-    color: var(--ink-mid);
-  }
+.s-progress {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid #3a3a4e;
+  flex-shrink: 0;
+}
+.s-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--sidebar-text);
+  margin-bottom: 7px;
+}
+.s-progress-bar { height: 4px; background: #3a3a4e; border-radius: 2px; overflow: hidden; }
+.s-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sidebar-accent), #a78bfa);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
 
-  /* 코드 블록 */
-  pre {
-    background: #1a2533;
-    color: #e6edf3;
-    border-radius: 10px;
-    padding: 16px 18px;
-    overflow-x: auto;
-    font-size: 13px;
-    line-height: 1.6;
-    margin: 14px 0;
-    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  }
-  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
-  code {
-    background: var(--accent-light);
-    color: var(--accent);
-    padding: 2px 6px;
-    border-radius: 5px;
-    font-size: 13px;
-    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  }
-  .build-divider {
-    background: var(--accent);
-    color: #fff;
-    padding: 64px 44px;
-  }
-  .build-divider .page-label { color: #a0bce0; }
-  .build-divider h1 { color: #fff; font-size: 32px; margin-bottom: 14px; }
-  .build-divider .desc { color: #a8c0d8; margin-bottom: 0; }
-  .step-list { counter-reset: stp; }
-  .step-list h3 { font-size: 17px; font-weight: 700; margin: 26px 0 8px; }
-  ul, ol { margin: 10px 0 10px 20px; }
-  li { font-size: 14px; color: var(--ink-mid); margin-bottom: 5px; }
+/* ── 메인 ── */
+.main { flex: 1; height: 100vh; overflow-y: auto; overflow-x: hidden; }
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-thumb { background: #ccc5b8; border-radius: 3px; }
 
-  @media (max-width: 680px) {
-    .page, .cover { padding: 44px 22px; }
-    h1 { font-size: 28px; }
-    .cover h1 { font-size: 30px; }
-    .grid { grid-template-columns: 1fr; }
-  }
+.content { padding: 48px 60px 80px; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── 섹션 헤더 ── */
+.sec-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.sec-title {
+  font-size: 30px;
+  font-weight: 900;
+  color: var(--text-bright);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.sec-desc {
+  font-size: 15px;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--border);
+  max-width: 820px;
+}
+
+/* ── 카드 ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 26px;
+  margin-bottom: 18px;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── URL 그리드 ── */
+.url-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.url-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  transition: all 0.15s;
+}
+.url-card:hover { border-color: var(--accent); box-shadow: 0 3px 16px rgba(42,92,170,0.1); transform: translateY(-2px); }
+.uc-name { font-size: 13px; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+.uc-desc { font-size: 12px; color: var(--text-dim); line-height: 1.4; margin-bottom: 12px; }
+.uc-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+.uc-badge.free { background: #d1fae5; color: #065f46; }
+.uc-badge.paid { background: #fef3c7; color: #92400e; }
+.url-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 6px;
+  transition: background 0.12s;
+}
+.url-btn:hover { background: #1e4a8a; }
+
+/* ── 스텝 아코디언 ── */
+.step-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.step-hd {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s;
+}
+.step-hd:hover { background: var(--surface2); }
+.step-num {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-num.alpha { background: var(--accent2); }
+.step-num.done-num { background: var(--green); }
+.step-info { flex: 1; }
+.step-info h3 { font-size: 15px; font-weight: 700; color: var(--text-bright); }
+.step-info p { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.step-chevron { color: var(--text-dim); font-size: 16px; transition: transform 0.2s; }
+.step-card.open .step-chevron { transform: rotate(180deg); }
+.step-bd {
+  display: none;
+  padding: 4px 22px 22px;
+  border-top: 1px solid var(--border-light);
+}
+.step-card.open .step-bd { display: block; }
+
+/* ── 인스트럭션 ── */
+.inst-list { padding-top: 6px; }
+.inst {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  align-items: flex-start;
+}
+.inst:last-child { border-bottom: none; }
+.inst-n {
+  width: 22px; height: 22px;
+  background: #e8f0fb;
+  color: var(--accent);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top:2px;
+}
+.inst-t { font-size: 14px; color: var(--text); line-height: 1.6; }
+.inst-t strong { color: var(--accent); font-weight: 600; }
+.inst-t .p {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: #e8f0fb;
+  color: var(--accent);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.inst-t .pg {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.inst-t a { color: var(--accent); }
+
+/* ── 배너 ── */
+.banner {
+  border-radius: 8px;
+  padding: 13px 16px;
+  margin: 14px 0;
+  display: flex;
+  gap: 11px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  align-items: flex-start;
+}
+.banner-i { font-size: 16px; flex-shrink: 0; margin-top:1px; }
+.banner.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.banner.success { background: #f0fdf4; color: #14532d; border: 1px solid #bbf7d0; }
+.banner.warn { background: #fffbeb; color: #78350f; border: 1px solid #fde68a; }
+.banner.purple { background: #f5f3ff; color: #4c1d95; border: 1px solid #ddd6fe; }
+.banner.tip { background: #fef9f0; color: #7c3313; border: 1px solid #fed7aa; }
+
+/* ── API 위치 안내 ── */
+.api-loc {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent3);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+.api-loc-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.api-loc-path {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  color: var(--green);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.api-loc-note { font-size: 12px; color: var(--text-dim); }
+
+/* ── 코드 블록 ── */
+.code-wrap {
+  background: var(--code-bg);
+  border: 1px solid #333;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 14px 0;
+}
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid #333;
+}
+.code-fname { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7070a0; }
+.copy-btn {
+  font-size: 11px;
+  color: #7070a0;
+  background: none;
+  border: 1px solid #444;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.12s;
+}
+.copy-btn:hover { border-color: #7eb3ff; color: #7eb3ff; }
+.copy-btn.copied { border-color: #6ee7a0; color: #6ee7a0; }
+.code-body { padding: 16px 18px; overflow-x: auto; }
+.code-body pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #cdd6f4;
+  white-space: pre;
+}
+.cm { color: #45475a; }
+.kw { color: #cba6f7; }
+.st { color: #a6e3a1; }
+.fn { color: #89b4fa; }
+.vr { color: #f38ba8; }
+.nm { color: #fab387; }
+
+/* ── 플로우 ── */
+.flow {
+  background: #1a1a2e;
+  border: 1px solid #2a2a40;
+  border-radius: 10px;
+  padding: 22px 24px;
+  margin: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 2;
+  overflow-x: auto;
+  white-space: pre;
+  color: #cdd6f4;
+}
+.fa { color: #89b4fa; }
+.fg { color: #a6e3a1; }
+.fo { color: #fab387; }
+.fp { color: #cba6f7; }
+.fd { color: #45475a; }
+
+/* ── 테이블 ── */
+.gt { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+.gt th {
+  background: var(--surface2);
+  padding: 11px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-dim);
+  border-bottom: 2px solid var(--border);
+  font-size: 12px;
+}
+.gt td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+  vertical-align: top;
+}
+.gt tr:last-child td { border-bottom: none; }
+.gt code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: #e8f0fb;
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.gt tr:hover td { background: #faf8f4; }
+.tag-free { color: #065f46; font-weight: 700; font-size: 12px; }
+.tag-paid { color: #92400e; font-weight: 700; font-size: 12px; }
+
+/* ── 완료 버튼 ── */
+.done-row {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.done-btn {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.12s;
+}
+.done-btn:hover { background: #145c38; }
+.done-btn.undone { background: #e0dbd2; color: #888; }
+.done-note { font-size: 12px; color: var(--text-dim); }
+
+/* ── 체크 카드 ── */
+.check-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.check-card-title { font-size: 14px; font-weight: 700; color: #14532d; margin-bottom: 14px; }
+.check-row { display: flex; gap: 10px; padding: 6px 0; align-items: flex-start; }
+.chk {
+  width: 18px; height: 18px;
+  border: 2px solid #86efac;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.chk-t { font-size: 14px; color: var(--text); }
+.chk-s { font-size: 12px; color: var(--text-dim); margin-top:2px; }
+
+/* ── 비전 카드 ── */
+.vision-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #2a2050 100%);
+  border-radius: 14px;
+  padding: 32px;
+  margin-bottom: 18px;
+  color: #e0e0f0;
+}
+.vision-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 12px; }
+.vision-desc { font-size: 14px; line-height: 1.8; color: #b0b0d0; }
+.vision-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.vision-tag {
+  background: rgba(126,179,255,0.15);
+  color: #7eb3ff;
+  border: 1px solid rgba(126,179,255,0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ── 두 컬럼 ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+
+/* ── 인라인 코드 ── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: #e8f0fb;
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
 </style>
 </head>
 <body>
 
-<!-- 표지 -->
-<section class="page cover">
-  <h1>권오혁 비서봇<br>운영 가이드</h1>
-  <div class="divider"></div>
-  <p class="desc">텔레그램 기반 AI 비서봇의 구조와 기능을 정리한 운영 참고 문서입니다.</p>
-  <a class="cover-cta" href="#build">상세 구축 가이드 보기 ↓</a>
-  <div class="meta">2026. 6. 17</div>
-</section>
+<!-- ── 사이드바 ── -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="s-logo">AI Comm · 비서봇</div>
+    <div class="s-title">AI 비서봇<br>운영·구축 가이드</div>
+    <div class="s-meta">
+      <div class="s-meta-row">Dify 없이 <strong>Cloudflare + Claude</strong></div>
+      <div class="s-meta-row" style="margin-top:8px; font-size:10px; color:#4a4a60;">슬림 버전</div>
+    </div>
+  </div>
 
-<!-- 1. 구동 구조 -->
-<section class="page">
-  <div class="page-label">01 — 구동 구조</div>
-  <h2>봇이 작동하는 방식</h2>
-  <p class="desc">텔레그램에 들어온 메시지·파일·이미지를 텍스트로 변환해 저장하고, 저장된 내용을 브리핑·검색·답변에 활용합니다.</p>
+  <div class="s-group-label">개요</div>
+  <div class="nav-item active" onclick="go('overview',this)"><span class="ni">🗺️</span> 전체 구조 & 비전</div>
 
-  <div class="flow">
-    <div class="step">
+  <div class="s-group-label">비서봇 기능</div>
+  <div class="nav-item" onclick="go('f-search',this)"><span class="ni">📂</span> 자료 검색·전송</div>
+  <div class="nav-item" onclick="go('f-brief',this)"><span class="ni">📅</span> 아침 브리핑</div>
+  <div class="nav-item" onclick="go('f-more',this)"><span class="ni">🧩</span> 조회·요약·외부검색</div>
+
+  <div class="s-group-label">구축 단계</div>
+  <div class="nav-item" onclick="go('s1',this)" id="nav-s1"><span class="ni">📱</span> Step 1. 텔레그램 봇<span class="nb" id="b-s1">시작</span></div>
+  <div class="nav-item" onclick="go('s2',this)" id="nav-s2"><span class="ni">⚡</span> Step 2. Cloudflare 준비<span class="nb" id="b-s2">시작</span></div>
+  <div class="nav-item" onclick="go('s3',this)" id="nav-s3"><span class="ni">🚀</span> Step 3. 설정 & 배포<span class="nb" id="b-s3">시작</span></div>
+
+  <div class="s-group-label">동작 원리</div>
+  <div class="nav-item" onclick="go('core',this)"><span class="ni">🧠</span> 코드 구조 & 라우팅</div>
+  <div class="nav-item" onclick="go('search',this)"><span class="ni">🔎</span> 자료 검색 원리<span class="nb new">하이브리드</span></div>
+
+  <div class="s-group-label">운영 & 참고</div>
+  <div class="nav-item" onclick="go('prompt',this)"><span class="ni">💬</span> 시스템 프롬프트</div>
+  <div class="nav-item" onclick="go('trouble',this)"><span class="ni">🛠️</span> 트러블슈팅 & 비용</div>
+  <div class="nav-item" onclick="go('future',this)"><span class="ni">🔮</span> 향후 방향</div>
+
+  <div class="s-progress">
+    <div class="s-progress-label"><span>구축 진행률</span><span id="prog-txt">0 / 3</span></div>
+    <div class="s-progress-bar"><div class="s-progress-fill" id="prog-fill"></div></div>
+  </div>
+</aside>
+
+<!-- ── 메인 ── -->
+<main class="main">
+<div class="content">
+
+<!-- ══════ 전체 구조 & 비전 ══════ -->
+<div class="section active" id="sec-overview">
+  <div class="sec-eyebrow">Overview</div>
+  <div class="sec-title">텔레그램 AI 비서봇 — 전체 구조</div>
+  <div class="sec-desc">각 구성원이 텔레그램에서 자기 전담 AI 비서봇과 대화하는 시스템. <strong>Dify 같은 중간 도구 없이 Cloudflare Worker가 Claude를 직접 호출</strong>한다 — 빠르고, 기밀이 외부를 경유하지 않는다.</div>
+
+  <div class="vision-card">
+    <div class="vision-title">🧭 핵심 설계 원칙</div>
+    <div class="vision-desc">
+      들어온 모든 것(텍스트·파일·이미지)을 <strong style="color:#fff">텍스트화해서 D1에 저장</strong>한다.<br>
+      저장된 자료를 브리핑·검색·답변이 재사용한다.<br>
+      날짜·분류 같은 정확성이 중요한 일은 코드(SQL)가 결정하고, 문장 생성만 Claude가 맡는다.
+    </div>
+    <div class="vision-tags">
+      <span class="vision-tag">Dify 제거 → 응답 2배 빨라짐</span>
+      <span class="vision-tag">기밀 외부 비경유</span>
+      <span class="vision-tag">서버리스 (안 쓰면 0원)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 각 도구, 왜 필요한가</div>
+    <table class="gt">
+      <thead><tr><th>도구</th><th>역할</th><th>비용</th></tr></thead>
+      <tbody>
+        <tr><td><strong>📱 텔레그램</strong></td><td>봇과 말 걸고 답 받는 채팅 창구 (BotFather)</td><td class="tag-free">무료</td></tr>
+        <tr><td><strong>⚡ Cloudflare Workers</strong></td><td>봇 로직(worker.js). 24시간 자동 실행 서버리스</td><td class="tag-free">무료</td></tr>
+        <tr><td><strong>🗄️ Cloudflare D1</strong></td><td>모든 메시지·요약·파일 정보 저장 (SQLite)</td><td class="tag-free">무료</td></tr>
+        <tr><td><strong>📦 Cloudflare KV</strong></td><td>시스템 프롬프트·대화 히스토리 저장</td><td class="tag-free">무료</td></tr>
+        <tr><td><strong>🧷 Cloudflare Vectorize</strong></td><td>의미 기반 검색 색인 (하이브리드 검색)</td><td class="tag-free">무료</td></tr>
+        <tr><td><strong>🧠 Claude API</strong></td><td>요약·분석·답변 (봇의 두뇌)</td><td class="tag-paid">사용량 비례</td></tr>
+        <tr><td><strong>🔍 Tavily</strong></td><td>실시간 외부 검색 (선택)</td><td class="tag-free">월 1,000건 무료</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔄 메시지 처리 전체 흐름</div>
+    <div class="flow"><span class="fo">📱 텔레그램에 메시지·파일·이미지 도착</span>
+         ↓  <span class="fd">(Webhook — 텔레그램이 Cloudflare로 자동 전달)</span>
+<span class="fa">⚡ Cloudflare Worker (worker.js)</span>
+         ├── <span class="fp">저장 먼저</span>  →  <span class="fg">🗄️ D1 저장 + 🧷 Vectorize 색인</span>
+         └── <span class="fd">질문이면</span>  →  <span class="fg">🔎 하이브리드 검색(키워드+의미)</span>
+                              ↓
+                    <span class="fa">🧠 Claude 호출</span>  <span class="fd">(단순=Haiku / 분석=Sonnet)</span>
+                              ↓
+<span class="fo">📱 텔레그램으로 답변·파일 전송</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💰 비용 (월 결제액 기준)</div>
+    <table class="gt">
+      <thead><tr><th>항목</th><th>비용</th></tr></thead>
+      <tbody>
+        <tr><td>Cloudflare (서버·저장·검색)</td><td class="tag-free">무료 (10GB)</td></tr>
+        <tr><td>Claude (두뇌)</td><td>$20~50 (사용량 비례)</td></tr>
+        <tr><td>Tavily (외부 검색)</td><td>월 1,000건 무료</td></tr>
+        <tr><td><strong>기본 운영 합계</strong></td><td><strong>약 $20~80 (월 3~10만원)</strong></td></tr>
+        <tr><td><strong>초기 구축</strong></td><td><strong style="color:var(--green)">0원</strong> (전담 개발자 없이 내부 구현)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🧱 운영 원칙</div>
+    <table class="gt">
+      <thead><tr><th>원칙</th><th>내용</th></tr></thead>
+      <tbody>
+        <tr><td><strong>날짜·분류는 코드</strong></td><td>일정 분류·날짜 계산은 SQL이 결정. AI는 문장 생성만.</td></tr>
+        <tr><td><strong>추측 없음</strong></td><td>DB에 없는 내용은 만들지 않고 "확인 필요"로 안내.</td></tr>
+        <tr><td><strong>내부 처리</strong></td><td>중간 도구 없이 Cloudflare 안에서만 처리 — 기밀 외부 비경유.</td></tr>
+        <tr><td><strong>단체방 파일 우선</strong></td><td>같은 파일이 단체방·DM에 있으면 단체방 버전 먼저 전송.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════ 기능: 자료 검색·전송 ══════ -->
+<div class="section" id="sec-f-search">
+  <div class="sec-eyebrow">Feature</div>
+  <div class="sec-title">📂 자료 검색·전송</div>
+  <div class="sec-desc">여러 방에 올라온 파일·사진·보고 메시지를 찾아 전송한다. 질문 방식에 따라 원본 파일로 보내거나 텍스트로 요약해 답한다.</div>
+
+  <div class="card">
+    <div class="card-title">💬 이렇게 쓴다</div>
+    <div class="banner info"><div class="banner-i">🗣️</div><div>"OI 전략회의 자료 공유해줘" · "6/15 보고 뭐 있어?" · "한혜승 담당이 공유한 내용 알려줘"</div></div>
+    <table class="gt">
+      <thead><tr><th>상황</th><th>봇의 응답</th></tr></thead>
+      <tbody>
+        <tr><td>단체방 파일</td><td><code>copyMessage</code>로 원본 파일 그대로 전송</td></tr>
+        <tr><td>단체방·DM 양쪽에 있는 파일</td><td>단체방 버전 우선 전송</td></tr>
+        <tr><td>DM 전용 파일</td><td>저장된 전체 내용을 텍스트로 제공</td></tr>
+        <tr><td>텍스트 보고</td><td>"누가·무슨 내용" 형태로 요약 답변</td></tr>
+      </tbody>
+    </table>
+    <div class="banner warn"><div class="banner-i">⚠️</div><div>DM으로만 공유된 파일은 file_id가 봇 전용이 아니어서 재전송이 불가. 중요 자료는 봇이 참여한 <strong>단체방에 올리면</strong> 이후 원본 파일로 전송된다.</div></div>
+  </div>
+</div>
+
+<!-- ══════ 기능: 아침 브리핑 ══════ -->
+<div class="section" id="sec-f-brief">
+  <div class="sec-eyebrow">Feature</div>
+  <div class="sec-title">📅 아침 브리핑</div>
+  <div class="sec-desc">매일 오전 9시(평일), 주요 일정·보고·의사결정을 분류해 자동 발송한다. 오늘보다 과거 날짜 항목은 코드 필터로 자동 제외된다.</div>
+
+  <div class="card">
+    <div class="card-title">📋 브리핑 양식</div>
+    <div class="flow"><span class="fo">📅 YYYY-MM-DD Daily Briefing</span>
+<span class="fa">📌 주요 일정</span>   <span class="fd">(임원·담당급 언급, 날짜 확정 일정)</span>
+<span class="fg">🔔 보고</span>        <span class="fd">(팀장·TL 진행 보고)</span>
+<span class="fp">💡 의사결정 필요</span>
+<span class="fo">📋 주요 내용</span>   <span class="fd">(방별 핵심 공유)</span></div>
+    <table class="gt">
+      <thead><tr><th>분류</th><th>기준</th></tr></thead>
+      <tbody>
+        <tr><td>📌 주요 일정</td><td>임원(담당급 이상)·CEO·총괄 관련</td></tr>
+        <tr><td>🔔 보고</td><td>팀장·TL 진행 보고</td></tr>
+        <tr><td>💡 의사결정</td><td>판단·승인 필요</td></tr>
+      </tbody>
+    </table>
+    <div class="banner success"><div class="banner-i">🎯</div><div>날짜·태그 분류는 코드(SQL)가 결정적으로 처리하고 문장만 Claude가 생성 — 날짜 계산이 틀리지 않는다.</div></div>
+  </div>
+</div>
+
+<!-- ══════ 기능: 조회·요약·외부검색 ══════ -->
+<div class="section" id="sec-f-more">
+  <div class="sec-eyebrow">Feature</div>
+  <div class="sec-title">🧩 조회 · 요약 · 외부 검색</div>
+  <div class="sec-desc">사람별 조회, 문서 요약, 일정·의사결정 조회, 외부 웹 검색까지 — 일상 업무 보조 기능들.</div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">🙋 사람별 내용 조회</div>
+      <p style="font-size:14px; color:var(--text-dim); line-height:1.7;">이름을 대면 해당 인원이 공유한 보고·자료를 모아 요약. 성·이름·영문명 모두 인식(<code>NAME_ALIASES</code>).</p>
+      <div class="banner info" style="margin-bottom:0"><div class="banner-i">🗣️</div><div>"한혜승 담당이 공유한 내용 알려줘"</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📄 문서 내용 요약</div>
+      <p style="font-size:14px; color:var(--text-dim); line-height:1.7;">파일에 답장(Reply) 후 요약을 요청하면 PDF·이미지·문서를 읽어 핵심만 정리.</p>
+      <div class="banner info" style="margin-bottom:0"><div class="banner-i">🗣️</div><div>파일에 Reply → "요약해줘"</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗓️ 일정·의사결정 조회</div>
+      <p style="font-size:14px; color:var(--text-dim); line-height:1.7;">날짜별 확정 일정과 판단이 필요한 사항을 분리해 알려줌.</p>
+      <div class="banner info" style="margin-bottom:0"><div class="banner-i">🗣️</div><div>"내일 일정 알려줘" · "오늘 의사결정 사항?"</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🌐 외부 검색 (Tavily)</div>
+      <p style="font-size:14px; color:var(--text-dim); line-height:1.7;">사내 자료에 없는 내용은 실시간 웹 검색으로 보완하고 출처 URL을 함께 제공.</p>
+      <div class="banner info" style="margin-bottom:0"><div class="banner-i">🗣️</div><div>"최근 HBM 시장 동향 찾아줘"</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ STEP 1 ══════ -->
+<div class="section" id="sec-s1">
+  <div class="sec-eyebrow">Step 1 / 3</div>
+  <div class="sec-title">📱 텔레그램 봇 생성</div>
+  <div class="sec-desc">BotFather에서 봇 이름을 만들고 Token(봇의 열쇠)을 받는다. 약 5분.</div>
+
+  <div class="banner info"><div class="banner-i">🔑</div><div><strong>Bot Token이란?</strong> 텔레그램이 "이게 진짜 네 봇"임을 확인하는 비밀 문자열. 나중에 Cloudflare secret에 입력한다. 절대 공유 금지.</div></div>
+
+  <div class="step-card open">
+    <div class="step-hd" onclick="tog(this)">
       <div class="step-num">1</div>
-      <div class="step-body">
-        <h3>수집</h3>
-        <p>연결된 단체방·DM에 올라온 메시지, 파일, 이미지를 실시간으로 받습니다.</p>
-        <span class="chip">Telegram Webhook</span>
+      <div class="step-info"><h3>BotFather에서 새 봇 생성</h3><p>이름·사용자명 설정 → Token 발급</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">텔레그램에서 <strong>@BotFather</strong> 검색 → 대화 시작</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t"><span class="p">/newbot</span> 입력</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">봇 이름, 사용자명(<strong>_bot</strong>으로 끝나야 함) 설정</div></div>
+        <div class="inst"><div class="inst-n">4</div><div class="inst-t">발급된 <strong>봇 토큰</strong> 저장 (예: <span class="pg">1234567:ABC-xyz...</span>)</div></div>
       </div>
     </div>
-    <div class="step">
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
       <div class="step-num">2</div>
-      <div class="step-body">
-        <h3>저장</h3>
-        <p>PDF·이미지를 읽어 텍스트로 바꾸고, 누가·언제·무슨 내용인지 요약해 데이터베이스에 저장합니다.</p>
-        <span class="chip">Claude + Cloudflare D1</span>
+      <div class="step-info"><h3>프라이버시 끄기</h3><p>그룹방 전체 메시지 수신에 필수</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="inst-list">
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">BotFather에 <span class="p">/setprivacy</span> 입력</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">해당 봇 선택 → <strong>Disable</strong></div></div>
+      </div>
+      <div class="banner warn" style="margin-bottom:0"><div class="banner-i">⚠️</div><div>Disable 안 하면 그룹방에서 멘션된 메시지만 받는다. 전체 메시지를 저장하려면 반드시 꺼야 한다.</div></div>
+    </div>
+  </div>
+
+  <div class="done-row">
+    <button class="done-btn" onclick="dn('s1',this)">✓ Step 1 완료 표시</button>
+    <span class="done-note">봇 토큰을 안전하게 저장했으면 완료.</span>
+  </div>
+</div>
+
+<!-- ══════ STEP 2 ══════ -->
+<div class="section" id="sec-s2">
+  <div class="sec-eyebrow">Step 2 / 3</div>
+  <div class="sec-title">⚡ Cloudflare 준비 (D1 · KV · Vectorize)</div>
+  <div class="sec-desc">wrangler를 설치하고 데이터베이스·저장소·검색 색인을 만든다. 약 10분.</div>
+
+  <div class="step-card open">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">1</div>
+      <div class="step-info"><h3>wrangler 설치 & 로그인</h3><p>Cloudflare 배포 도구</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-fname">터미널</span><button class="copy-btn" onclick="cp(this,'c-wr')">복사</button></div>
+        <div class="code-body"><pre id="c-wr">npm install -g wrangler
+wrangler login</pre></div>
       </div>
     </div>
-    <div class="step">
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">2</div>
+      <div class="step-info"><h3>D1 데이터베이스 + messages 테이블</h3><p>모든 메시지·요약·파일 저장</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-fname">터미널</span><button class="copy-btn" onclick="cp(this,'c-d1')">복사</button></div>
+        <div class="code-body"><pre id="c-d1">wrangler d1 create 6r-ai-db
+# 출력되는 database_id 복사해둘 것
+wrangler d1 execute 6r-ai-db --remote --file=schema.sql</pre></div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-fname">schema.sql</span><button class="copy-btn" onclick="cp(this,'c-sql')">복사</button></div>
+        <div class="code-body"><pre id="c-sql">CREATE TABLE IF NOT EXISTS messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  telegram_message_id TEXT,
+  room_id TEXT NOT NULL,
+  room_title TEXT,
+  sender_id TEXT NOT NULL,
+  sender_name TEXT,
+  content TEXT NOT NULL,
+  status_tag TEXT DEFAULT '',
+  field_tag TEXT DEFAULT '',
+  milestone_date TEXT DEFAULT '',
+  file_id TEXT DEFAULT '',
+  file_name TEXT DEFAULT '',
+  summary TEXT DEFAULT '',
+  action_items TEXT DEFAULT '',
+  needs_escalation INTEGER DEFAULT 0,
+  info_tag TEXT DEFAULT '',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
       <div class="step-num">3</div>
-      <div class="step-body">
-        <h3>검색</h3>
-        <p>질문이 들어오면 키워드와 의미 두 방식으로 동시에 찾아 관련 자료를 선별합니다.</p>
-        <span class="chip">키워드 + 의미 검색 (Vectorize)</span>
+      <div class="step-info"><h3>KV & Vectorize 생성</h3><p>프롬프트 저장 + 의미 검색 색인</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-fname">터미널</span><button class="copy-btn" onclick="cp(this,'c-kv')">복사</button></div>
+        <div class="code-body"><pre id="c-kv">wrangler kv namespace create PROMPT
+wrangler vectorize create 6r-ai-index --dimensions=1024 --metric=cosine</pre></div>
+      </div>
+      <div class="banner info" style="margin-bottom:0"><div class="banner-i">💡</div><div>KV는 시스템 프롬프트·대화 히스토리, Vectorize는 하이브리드 검색의 의미 색인에 쓰인다. 출력되는 <code>id</code>를 복사해둘 것.</div></div>
+    </div>
+  </div>
+
+  <div class="done-row">
+    <button class="done-btn" onclick="dn('s2',this)">✓ Step 2 완료 표시</button>
+    <span class="done-note">database_id · KV id를 복사해뒀으면 완료.</span>
+  </div>
+</div>
+
+<!-- ══════ STEP 3 ══════ -->
+<div class="section" id="sec-s3">
+  <div class="sec-eyebrow">Step 3 / 3</div>
+  <div class="sec-title">🚀 설정 & 배포</div>
+  <div class="sec-desc">wrangler.toml을 채우고 비밀 키를 등록한 뒤 배포하고 웹훅을 연결한다. 약 10분.</div>
+
+  <div class="step-card open">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">1</div>
+      <div class="step-info"><h3>wrangler.toml 작성</h3><p>바인딩·cron 설정</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-fname">wrangler.toml</span><button class="copy-btn" onclick="cp(this,'c-toml')">복사</button></div>
+        <div class="code-body"><pre id="c-toml">name = "내봇이름"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+keep_vars = true
+
+[vars]
+BRIEFING_CHAT_ID = "-방ID1,-방ID2"   # 아침 브리핑 보낼 방
+BOT_USERNAME = "내봇이름_bot"          # @ 제외
+
+[triggers]
+crons = ["0 0 * * 1-5"]   # UTC 00:00 = KST 09:00, 월~금
+
+[[d1_databases]]
+binding = "DB"
+database_name = "6r-ai-db"
+database_id = "위에서_복사한_DB_ID"
+
+[[kv_namespaces]]
+binding = "PROMPT"
+id = "위에서_복사한_KV_ID"</pre></div>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-body">
-        <h3>답변</h3>
-        <p>찾은 내용을 정리해 답하거나, 원본 파일을 그대로 전송합니다. 아침 브리핑은 매일 9시에 자동 발송됩니다.</p>
-        <span class="chip">Claude + Telegram</span>
+  </div>
+
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">2</div>
+      <div class="step-info"><h3>비밀 키 등록 & 배포</h3><p>토큰·API 키는 secret으로</p></div>
+      <div class="step-chevron">⌄</div>
+    </div>
+    <div class="step-bd">
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-fname">터미널</span><button class="copy-btn" onclick="cp(this,'c-sec')">복사</button></div>
+        <div class="code-body"><pre id="c-sec">wrangler secret put TELEGRAM_BOT_TOKEN   # BotFather 토큰
+wrangler secret put ANTHROPIC_API_KEY    # Claude API 키
+wrangler secret put TAVILY_API_KEY       # (선택) 외부 검색
+
+wrangler deploy   # 출력되는 Worker URL 복사</pre></div>
       </div>
     </div>
   </div>
 
-  <div class="stack">
-    <span>Telegram</span>
-    <span class="arr">→</span>
-    <span>Cloudflare Workers</span>
-    <span class="arr">→</span>
-    <span>D1 · KV · Vectorize</span>
-    <span class="arr">→</span>
-    <span>Claude API</span>
-  </div>
-</section>
-
-<!-- 2. 기능 -->
-<section class="page">
-  <div class="page-label">02 — 비서봇 기능</div>
-  <h2>기능</h2>
-  <p class="desc">질문 방식에 따라 자료를 파일로 전송하거나, 텍스트 내용으로 요약해 답합니다.</p>
-
-  <div class="grid">
-    <div class="feat">
-      <h3>자료 검색·전송</h3>
-      <p>여러 방에 올라온 파일·사진·보고 메시지를 찾아 전송합니다. 단체방 파일은 원본으로, DM 파일은 내용 텍스트로 제공합니다.</p>
-      <div class="ex">"OI 전략회의 자료 공유해줘"</div>
+  <div class="step-card">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="step-num">3</div>
+      <div class="step-info"><h3>텔레그램 웹훅 연결</h3><p>봇 ↔ Worker 연결</p></div>
+      <div class="step-chevron">⌄</div>
     </div>
-    <div class="feat">
-      <h3>아침 브리핑</h3>
-      <p>주요 일정·보고·의사결정 사항을 분류해 매일 오전 9시에 자동 발송합니다. 오늘보다 과거 항목은 자동으로 제외됩니다.</p>
-      <div class="ex">📌 주요 일정 · 🔔 보고 · 💡 의사결정</div>
-    </div>
-    <div class="feat">
-      <h3>사람별 내용 조회</h3>
-      <p>이름을 대면 해당 인원이 공유한 보고·자료를 모아 요약합니다. 성·이름·영문명 모두 인식합니다.</p>
-      <div class="ex">"한혜승 담당이 공유한 내용 알려줘"</div>
-    </div>
-    <div class="feat">
-      <h3>문서 내용 요약</h3>
-      <p>파일에 답장(Reply) 후 요약을 요청하면 PDF·이미지·문서를 읽어 핵심만 정리합니다.</p>
-      <div class="ex">파일에 Reply → "요약해줘"</div>
-    </div>
-    <div class="feat">
-      <h3>일정·의사결정 조회</h3>
-      <p>날짜별 확정 일정과 판단이 필요한 사항을 분리해 알려줍니다.</p>
-      <div class="ex">"내일 일정 알려줘" / "오늘 의사결정 사항?"</div>
-    </div>
-    <div class="feat">
-      <h3>외부 검색</h3>
-      <p>사내 자료에 없는 내용은 실시간 웹 검색으로 보완하고 출처를 함께 제공합니다.</p>
-      <div class="ex">"최근 HBM 시장 동향 찾아줘"</div>
+    <div class="step-bd">
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-fname">터미널</span><button class="copy-btn" onclick="cp(this,'c-hook')">복사</button></div>
+        <div class="code-body"><pre id="c-hook">curl "https://api.telegram.org/bot&lt;봇토큰&gt;/setWebhook?url=&lt;WorkerURL&gt;"</pre></div>
+      </div>
+      <div class="banner success" style="margin-bottom:0"><div class="banner-i">✅</div><div><code>{"ok":true}</code>가 나오면 연결 완료. 봇에게 메시지를 보내면 응답한다.</div></div>
     </div>
   </div>
-</section>
 
-<!-- 3. 운영 원칙 -->
-<section class="page">
-  <div class="page-label">03 — 운영 원칙</div>
-  <h2>설계 기준</h2>
-  <p class="desc">정확성과 보안을 위해 코드와 AI의 역할을 명확히 나눴습니다.</p>
-
-  <table>
-    <tr>
-      <th>원칙</th>
-      <th>내용</th>
-    </tr>
-    <tr>
-      <td>날짜·분류는 코드가 결정</td>
-      <td>일정 분류·날짜 계산은 SQL로 처리. AI는 문장 생성만 담당합니다.</td>
-    </tr>
-    <tr>
-      <td>추측 없음</td>
-      <td>DB에 없는 내용은 만들지 않고 "확인 필요"로 안내합니다.</td>
-    </tr>
-    <tr>
-      <td>내부 처리</td>
-      <td>Dify 등 중간 도구 없이 Cloudflare 내에서만 처리합니다. 기밀 자료가 외부를 경유하지 않습니다.</td>
-    </tr>
-    <tr>
-      <td>단체방 파일 우선</td>
-      <td>같은 파일이 단체방·DM 양쪽에 있으면 단체방 버전을 먼저 전송합니다.</td>
-    </tr>
-  </table>
-
-  <div class="note">
-    DM으로만 공유된 파일은 file_id가 봇 전용이 아니어서 재전송이 불가합니다. 중요 자료는 OHKwon_bot이 참여한 단체방에 올리면 이후 요청 시 원본 파일로 전송됩니다.
+  <div class="done-row">
+    <button class="done-btn" onclick="dn('s3',this)">✓ Step 3 완료 표시</button>
+    <span class="done-note">봇이 응답하면 구축 완료!</span>
   </div>
-</section>
+</div>
 
-<!-- 4. 향후 -->
-<section class="page">
-  <div class="page-label">04 — 향후 방향</div>
-  <h2>다음 단계</h2>
-  <p class="desc">현재는 안정성 검증 기술로 구현했으며, 아래 순서로 확장 검토 중입니다.</p>
+<!-- ══════ 코드 구조 & 라우팅 ══════ -->
+<div class="section" id="sec-core">
+  <div class="sec-eyebrow">Internals</div>
+  <div class="sec-title">🧠 코드 구조 & 라우팅</div>
+  <div class="sec-desc">worker.js의 핵심은 처리 순서다. <strong>저장이 먼저, 라우팅이 나중</strong> — 과거 저장이 라우팅 뒤에 있어 메시지가 누락된 버그가 있었다.</div>
 
-  <table>
-    <tr>
-      <th>단계</th>
-      <th>기능</th>
-      <th>비고</th>
-    </tr>
-    <tr>
-      <td>RAG 고도화</td>
-      <td>의미 기반 검색 확장<small>현재 키워드+의미 하이브리드 적용 중</small></td>
-      <td>Cloudflare Vectorize</td>
-    </tr>
-    <tr>
-      <td>구글 연동</td>
-      <td>드라이브·캘린더 자료 직접 읽기</td>
-      <td>API 연동</td>
-    </tr>
-    <tr>
-      <td>학습형 에이전트</td>
-      <td>보고·응답 패턴 학습 후 선제 제공</td>
-      <td>조직 검증 후 확정</td>
-    </tr>
-    <tr>
-      <td>컴총괄 확산</td>
-      <td>각 조직 단위 자율 운영 (2단계)</td>
-      <td>중앙 구축 완료 후</td>
-    </tr>
-  </table>
-</section>
-
-<!-- ===== 상세 구축 가이드 (슬림 버전) ===== -->
-<section class="page build-divider" id="build">
-  <div class="page-label">상세 구축 가이드</div>
-  <h1>처음부터 직접 만들기</h1>
-  <p class="desc">Dify 없이 Cloudflare + Claude만으로 새 봇 하나를 처음부터 끝까지 구축하는 단계별 가이드입니다.</p>
-</section>
-
-<!-- 전체 구조 -->
-<section class="page">
-  <div class="page-label">05 — 전체 구조</div>
-  <h2>한눈에 보는 구조</h2>
-  <p class="desc">들어온 모든 것(텍스트·파일·이미지)을 텍스트화해 D1에 저장하고, 저장된 자료를 브리핑·검색·답변이 재사용합니다. Dify 같은 중간 도구 없이 Worker가 Claude를 직접 호출합니다 — 빠르고, 기밀이 외부를 경유하지 않습니다.</p>
-<pre><code>[텔레그램]
-    ↓ 메시지·파일 수신
-[Cloudflare Workers]   ← 봇 로직 (worker.js)
-    ↓
-[Cloudflare D1]        ← 모든 메시지·요약·파일 정보 저장
-[Cloudflare KV]        ← 시스템 프롬프트·대화 히스토리
-[Cloudflare Vectorize] ← 의미 기반 검색 색인
-    ↓
-[Claude API]           ← 요약·분석·답변 (두뇌)
-[Tavily API]           ← 실시간 외부 검색 (선택)
-    ↓
-[텔레그램]             ← 답변 전송</code></pre>
-</section>
-
-<!-- 준비물 -->
-<section class="page">
-  <div class="page-label">06 — 준비물</div>
-  <h2>필요한 것</h2>
-  <table>
-    <tr><th>항목</th><th>용도</th><th>비용</th></tr>
-    <tr><td>텔레그램 계정</td><td>봇 생성 (BotFather)</td><td>무료</td></tr>
-    <tr><td>Cloudflare 계정</td><td>서버·DB·KV·Vectorize</td><td>무료 (10GB까지)</td></tr>
-    <tr><td>Anthropic API 키</td><td>Claude 두뇌</td><td>사용량 비례 ($20~50/월)</td></tr>
-    <tr><td>Tavily API 키</td><td>외부 검색 (선택)</td><td>월 1,000건 무료</td></tr>
-    <tr><td>Node.js + wrangler</td><td>배포 도구</td><td>무료</td></tr>
-  </table>
-</section>
-
-<!-- 단계별 구축 -->
-<section class="page">
-  <div class="page-label">07 — 단계별 구축</div>
-  <h2>봇 만들기 8단계</h2>
-  <div class="step-list">
-    <h3>1. 텔레그램 봇 생성</h3>
-    <p>텔레그램에서 <code>@BotFather</code> → <code>/newbot</code> → 이름·사용자명(<code>_bot</code>으로 끝) 설정 → <b>봇 토큰</b> 저장. <code>/setprivacy</code> → <code>Disable</code> (그룹방 전체 메시지 수신에 필수).</p>
-
-    <h3>2. Cloudflare 세팅</h3>
-<pre><code>npm install -g wrangler
-wrangler login</code></pre>
-
-    <h3>3. D1 데이터베이스 생성</h3>
-<pre><code>wrangler d1 create 6r-ai-db
-# 출력되는 database_id 복사
-wrangler d1 execute 6r-ai-db --remote --file=schema.sql</code></pre>
-    <p>messages 테이블(room_id·sender_id·content·status_tag·milestone_date·file_id·summary 등)을 schema.sql로 생성합니다.</p>
-
-    <h3>4. KV 네임스페이스 생성</h3>
-<pre><code>wrangler kv namespace create PROMPT   # 시스템 프롬프트·대화 히스토리</code></pre>
-
-    <h3>5. wrangler.toml 작성</h3>
-    <p>name·main·compatibility 설정과 <code>[vars]</code>(BRIEFING_CHAT_ID·BOT_USERNAME), <code>[triggers] crons = ["0 0 * * 1-5"]</code>(KST 09:00 월~금), <code>[[d1_databases]]</code>·<code>[[kv_namespaces]]</code> 바인딩을 채웁니다.</p>
-
-    <h3>6. 비밀 키 등록</h3>
-<pre><code>wrangler secret put TELEGRAM_BOT_TOKEN
-wrangler secret put ANTHROPIC_API_KEY
-wrangler secret put TAVILY_API_KEY   # (선택)</code></pre>
-
-    <h3>7. 배포</h3>
-<pre><code>wrangler deploy   # 출력되는 Worker URL 복사</code></pre>
-
-    <h3>8. 텔레그램 웹훅 연결</h3>
-<pre><code>curl "https://api.telegram.org/bot&lt;봇토큰&gt;/setWebhook?url=&lt;WorkerURL&gt;"</code></pre>
-    <p><code>{"ok":true}</code>가 나오면 완료. 봇에게 메시지를 보내면 응답합니다.</p>
+  <div class="card">
+    <div class="card-title">📨 메시지 라우팅 순서 (handleMessage)</div>
+    <div class="flow"><span class="fd">1.</span> 봇 자신 메시지면 <span class="fo">무시</span>
+<span class="fd">2.</span> <span class="fp">/설정</span> 명령 → 시스템 프롬프트 수정
+<span class="fd">3.</span> 파일·이미지 → <span class="fg">추출·저장·요약 (ingestAndSummarize)</span>
+<span class="fd">4.</span> 텍스트 → 잡담 아니면 <span class="fa">먼저 DB 저장 (saveMessage)</span>
+<span class="fd">5.</span> #보고 등 태그 → 업무보고 처리 (handleReport)
+<span class="fd">6.</span> 봇 멘션·질문 → <span class="fg">답변 생성 (handleQuery)</span>
+<span class="fd">7.</span> 그 외는 저장만 (응답 없음)</div>
   </div>
-</section>
 
-<!-- 핵심 코드 구조 -->
-<section class="page">
-  <div class="page-label">08 — 핵심 코드 구조</div>
-  <h2>worker.js 흐름</h2>
-  <p class="desc">처리 순서가 중요합니다. <b>저장이 먼저, 라우팅이 나중</b>입니다. (과거 저장이 라우팅 뒤에 있어 메시지가 누락된 버그가 있었음)</p>
-<pre><code>1. 봇 자신 메시지면 무시
-2. /설정 명령 → 시스템 프롬프트 수정
-3. 파일·이미지 → 추출·저장·요약 (ingestAndSummarize)
-4. 텍스트 → 잡담 아니면 먼저 DB 저장 (saveMessage)
-5. #보고 등 태그 → 업무보고 처리 (handleReport)
-6. 봇 멘션·질문 → 답변 생성 (handleQuery)
-7. 그 외는 저장만 (응답 없음)</code></pre>
-  <h3>모델 라우팅 (비용 절감 핵심)</h3>
-  <p>단순 대화는 Haiku, 분석·브리핑은 Sonnet으로 자동 분기합니다.</p>
-<pre><code>const MODEL_FAST  = "claude-haiku-4-5-20251001";  // 단순 대화
+  <div class="card">
+    <div class="card-title">⚖️ 모델 라우팅 (비용 절감 핵심)</div>
+    <div class="code-wrap">
+      <div class="code-bar"><span class="code-fname">worker.js</span><button class="copy-btn" onclick="cp(this,'c-model')">복사</button></div>
+      <div class="code-body"><pre id="c-model">const MODEL_FAST  = "claude-haiku-4-5-20251001";  // 단순 대화 (저렴)
 const MODEL_SMART = "claude-sonnet-4-6";          // 분석·브리핑
 
 function isComplexQuery(query, hasFile) {
   if (hasFile) return true;
   if (query.length &gt; 100) return true;
   return /(요약|분석|보고|브리핑|정리|검토|작성|전략|판단|비교|예측)/.test(query);
-}</code></pre>
-</section>
+}</pre></div>
+    </div>
+    <div class="banner tip" style="margin-bottom:0"><div class="banner-i">💸</div><div>단순 대화는 Haiku, 분석·브리핑은 Sonnet으로 자동 분기 → 품질은 유지하고 비용은 절감.</div></div>
+  </div>
+</div>
 
-<!-- 파일 처리 & 검색 -->
-<section class="page">
-  <div class="page-label">09 — 파일 처리 & 검색</div>
-  <h2>파일 처리</h2>
-  <table>
-    <tr><th>형식</th><th>처리 방식</th></tr>
-    <tr><td>PDF</td><td>Claude에 base64 document로 직접 전달 (표·레이아웃까지 인식)</td></tr>
-    <tr><td>이미지</td><td>Claude Vision으로 텍스트화 (describeImage)</td></tr>
-    <tr><td>PPTX/DOCX/XLSX</td><td>파일에 Reply 후 요약 요청 시 텍스트 추출해 답변</td></tr>
-  </table>
+<!-- ══════ 자료 검색 원리 ══════ -->
+<div class="section" id="sec-search">
+  <div class="sec-eyebrow">Internals</div>
+  <div class="sec-title">🔎 자료 검색 원리 (하이브리드)</div>
+  <div class="sec-desc">키워드 검색과 의미 검색을 동시에 돌려 병합·중복제거 후 상위 12개를 반환한다.</div>
 
-  <h2 style="margin-top:34px;">자료 검색 (하이브리드)</h2>
-  <p class="desc">키워드와 의미 검색을 동시에 돌려 병합·중복제거 후 상위 12개를 반환합니다.</p>
-  <ul>
-    <li><b>키워드 검색</b> — content·summary·file_name·sender_name LIKE</li>
-    <li><b>의미 검색(Vectorize)</b> — 질문을 임베딩해 의미 유사 항목 조회</li>
-    <li><b>발신자 명시 검색</b> — "예슬TL이 보고한 자료"처럼 사람이 명시되면 해당 인원 우선 (NAME_ALIASES로 이름·성·영문명 변형 매칭)</li>
-    <li><b>자료 통합</b> — 단체방 파일은 copyMessage로 원본 전송, DM 전용 파일은 텍스트로 제공, 같은 파일이 양쪽에 있으면 단체방 버전 우선</li>
-  </ul>
-  <div class="note">내부 자료에 없거나 "검색해줘/최신" 요청이면 Tavily 외부 검색으로 보완하고 출처 URL을 함께 제공합니다.</div>
-</section>
+  <div class="card">
+    <div class="card-title">🧬 하이브리드 검색 (searchMemory)</div>
+    <div class="inst-list">
+      <div class="inst"><div class="inst-n">1</div><div class="inst-t"><strong>키워드 검색(likeSearch)</strong> — content·summary·file_name·sender_name LIKE</div></div>
+      <div class="inst"><div class="inst-n">2</div><div class="inst-t"><strong>의미 검색(Vectorize)</strong> — 질문을 임베딩해 의미 유사 항목 조회</div></div>
+      <div class="inst"><div class="inst-n">3</div><div class="inst-t">두 결과를 <strong>병합·중복제거</strong> → 상위 12개 반환</div></div>
+    </div>
+    <div class="banner success"><div class="banner-i">✨</div><div>키워드만 쓰던 시절엔 "M15X 사고"로 저장된 걸 "화재"로 못 찾았다. 의미 검색이 붙으면서 이 한계가 풀렸다.</div></div>
+  </div>
 
-<!-- 브리핑 & 프롬프트 -->
-<section class="page">
-  <div class="page-label">10 — 브리핑 & 프롬프트</div>
-  <h2>아침 브리핑</h2>
-  <p class="desc">cron(KST 09:00 월~금)에 자동 실행. 날짜·태그 분류는 코드(SQL)가 결정적으로 처리하고 문장만 Claude가 생성합니다.</p>
-<pre><code>📅 YYYY-MM-DD Daily Briefing
-📌 주요 일정   (임원·담당급 언급, 날짜 확정 일정)
-🔔 보고        (팀장·TL 진행 보고)
-💡 의사결정 필요
-📋 주요 내용   (방별 핵심 공유)</code></pre>
-  <p>오늘보다 과거 날짜 항목은 코드 필터로 자동 제외됩니다.</p>
+  <div class="card">
+    <div class="card-title">🙋 발신자 명시 검색 (searchBySender)</div>
+    <p style="font-size:14px; color:var(--text-dim); line-height:1.7;">"예슬TL이 보고한 자료"처럼 사람이 명시되면 해당 인원 메시지를 우선 필터. <code>NAME_ALIASES</code>로 이름·성·영문명 변형을 자동 매칭한다.</p>
+  </div>
 
-  <h2 style="margin-top:34px;">시스템 프롬프트 규칙</h2>
-  <p class="desc">KV에 저장되어 <code>/설정</code> 명령으로 재배포 없이 수정 가능합니다.</p>
-  <ul>
-    <li>존댓말, 짧고 간결하게, 바로 본론</li>
-    <li>마크다운(**,#,*) 금지. HTML <code>&lt;b&gt;</code> 태그만 사용</li>
-    <li>문장 끝 "~입니다" 금지, 명사형으로 마무리</li>
-    <li>블릿(•) 사용 (모바일 가독성)</li>
-    <li>추측 금지 — 없는 정보는 만들지 않음</li>
-  </ul>
-</section>
+  <div class="card">
+    <div class="card-title">📎 파일 처리 (ingestAndSummarize)</div>
+    <table class="gt">
+      <thead><tr><th>형식</th><th>처리 방식</th></tr></thead>
+      <tbody>
+        <tr><td><strong>PDF</strong></td><td>Claude에 base64 document로 직접 전달 (표·레이아웃까지 인식, 32MB 이하)</td></tr>
+        <tr><td><strong>이미지</strong></td><td>Claude Vision으로 텍스트화 (describeImage)</td></tr>
+        <tr><td><strong>PPTX/DOCX/XLSX</strong></td><td>파일에 Reply 후 요약 요청 시 텍스트 추출해 답변</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-<!-- 트러블슈팅 & 비용 -->
-<section class="page">
-  <div class="page-label">11 — 트러블슈팅 & 비용</div>
-  <h2>자주 막히는 곳</h2>
-  <table>
-    <tr><th>증상</th><th>해결</th></tr>
-    <tr><td>메시지 저장 안 됨</td><td>sender_id를 String() 캐스팅 + insertMessage try-catch</td></tr>
-    <tr><td>그룹방 응답 없음</td><td>BotFather <code>/setprivacy</code> → Disable</td></tr>
-    <tr><td>외부 검색 안 됨</td><td>TAVILY_API_KEY secret 등록 확인</td></tr>
-    <tr><td>브리핑 안 옴</td><td>cron 시간(UTC) — <code>0 0 * * 1-5</code> = KST 09:00</td></tr>
-    <tr><td>한글 깨짐</td><td>코드 수정은 에디터/Codex로 (PowerShell 직접 수정 금지)</td></tr>
-  </table>
+<!-- ══════ 시스템 프롬프트 ══════ -->
+<div class="section" id="sec-prompt">
+  <div class="sec-eyebrow">Operations</div>
+  <div class="sec-title">💬 시스템 프롬프트 규칙</div>
+  <div class="sec-desc">봇 응답 품질을 좌우하는 핵심. KV에 저장되어 <code>/설정</code> 명령으로 재배포 없이 수정 가능하다.</div>
 
-  <h2 style="margin-top:34px;">비용 (월 결제액)</h2>
-  <table>
-    <tr><th>항목</th><th>비용</th></tr>
-    <tr><td>Cloudflare</td><td>무료 (10GB)</td></tr>
-    <tr><td>Claude</td><td>$20~50 (사용량 비례)</td></tr>
-    <tr><td>Tavily</td><td>월 1,000건 무료</td></tr>
-    <tr><td>기본 운영 합계</td><td><b>약 $20~80 (월 3~10만원)</b></td></tr>
-    <tr><td>초기 구축</td><td><b>0원</b> (전담 개발자 없이 내부 구현)</td></tr>
-  </table>
-</section>
+  <div class="card">
+    <div class="card-title">✅ 검증된 규칙</div>
+    <div class="inst-list">
+      <div class="inst"><div class="inst-n">1</div><div class="inst-t">존댓말, 짧고 간결하게, 바로 본론</div></div>
+      <div class="inst"><div class="inst-n">2</div><div class="inst-t">마크다운(**,#,*) 금지. HTML <strong>&lt;b&gt;</strong> 태그만 사용</div></div>
+      <div class="inst"><div class="inst-n">3</div><div class="inst-t">문장 끝 "~입니다" 금지. <strong>명사형</strong>으로 끝낼 것</div></div>
+      <div class="inst"><div class="inst-n">4</div><div class="inst-t">블릿포인트(•) 사용 (텔레그램 모바일 가독성)</div></div>
+      <div class="inst"><div class="inst-n">5</div><div class="inst-t">긴급(오늘·D-1)은 🚨, D-7 이내는 ⚠️ 표시</div></div>
+      <div class="inst"><div class="inst-n">6</div><div class="inst-t"><strong>추측 금지.</strong> 없는 정보는 만들지 않음</div></div>
+    </div>
+  </div>
+</div>
 
+<!-- ══════ 트러블슈팅 & 비용 ══════ -->
+<div class="section" id="sec-trouble">
+  <div class="sec-eyebrow">Operations</div>
+  <div class="sec-title">🛠️ 트러블슈팅 & 비용</div>
+  <div class="sec-desc">자주 막히는 곳과 해결책, 그리고 월 운영 비용.</div>
+
+  <div class="card">
+    <div class="card-title">🚧 자주 막히는 곳</div>
+    <table class="gt">
+      <thead><tr><th>증상</th><th>원인</th><th>해결</th></tr></thead>
+      <tbody>
+        <tr><td>메시지 저장 안 됨</td><td>sender_id NULL로 INSERT 실패</td><td><code>String()</code> 캐스팅 + try-catch</td></tr>
+        <tr><td>그룹방 응답 없음</td><td>BotFather privacy 설정</td><td><code>/setprivacy</code> → Disable</td></tr>
+        <tr><td>외부 검색 안 됨</td><td>TAVILY_API_KEY 미등록</td><td>secret 등록 확인</td></tr>
+        <tr><td>브리핑 안 옴</td><td>cron 시간(UTC 기준)</td><td><code>0 0 * * 1-5</code> = KST 09:00</td></tr>
+        <tr><td>한글 깨짐</td><td>PowerShell 직접 수정</td><td>에디터/Codex로 수정, UTF-8 유지</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💰 비용 (월 결제액)</div>
+    <table class="gt">
+      <thead><tr><th>항목</th><th>비용</th></tr></thead>
+      <tbody>
+        <tr><td>Cloudflare</td><td class="tag-free">무료 (10GB, 초과 100GB당 약 2천원)</td></tr>
+        <tr><td>Claude (두뇌)</td><td>$20~50 (사용량 비례)</td></tr>
+        <tr><td>Tavily (검색)</td><td>월 1,000건 무료, 초과 시 $30~</td></tr>
+        <tr><td><strong>기본 운영 합계</strong></td><td><strong>약 $20~80 (월 3~10만원)</strong></td></tr>
+        <tr><td><strong>초기 구축</strong></td><td><strong style="color:var(--green)">0원</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════ 향후 방향 ══════ -->
+<div class="section" id="sec-future">
+  <div class="sec-eyebrow">Roadmap</div>
+  <div class="sec-title">🔮 향후 방향</div>
+  <div class="sec-desc">현재는 안정성 검증 기술(Claude·Cloudflare)로 구현했으며, 아래 순서로 확장 검토 중이다.</div>
+
+  <div class="card">
+    <table class="gt">
+      <thead><tr><th>단계</th><th>기능</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td><strong>RAG</strong> <span style="color:var(--green); font-weight:700;">(적용 중)</span></td><td>키워드+의미 하이브리드 검색 가동. 색인 확대 중</td><td>Cloudflare Vectorize</td></tr>
+        <tr><td>구글 연동</td><td>드라이브·캘린더 자료 직접 읽어 브리핑 반영</td><td>API 무료 (두뇌 비용만)</td></tr>
+        <tr><td>학습형 에이전트</td><td>보고·응답 패턴 학습 → 선제 제공</td><td>조직 검증 후 확정</td></tr>
+        <tr><td>컴총괄 확산</td><td>각 조직 단위 자율 운영 (2단계)</td><td>중앙 구축 완료 후</td></tr>
+      </tbody>
+    </table>
+    <div class="banner tip" style="margin-bottom:0"><div class="banner-i">🌱</div><div>1차는 안정성을 위해 검증된 Claude·Cloudflare로 구현. 쌓인 자료를 기억하고 선제 제시하는 방향으로 디벨롭 검토 중. AI·검색 도구는 빠르게 발전 중이라 더 낫고 저렴한 옵션으로 교체될 수 있다.</div></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</main>
+
+<script>
+function go(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  el.classList.add('active');
+  document.querySelector('.main').scrollTo(0, 0);
+}
+function tog(hd) { hd.parentElement.classList.toggle('open'); }
+const STEP_TOTAL = 3;
+const doneMap = {};
+function dn(step, btn) {
+  if (doneMap[step]) {
+    doneMap[step] = false;
+    btn.textContent = '✓ Step ' + step.replace('s','') + ' 완료 표시';
+    btn.classList.remove('undone');
+    const b = document.getElementById('b-' + step);
+    if (b) { b.textContent = '시작'; b.className = 'nb'; }
+  } else {
+    doneMap[step] = true;
+    btn.textContent = '↩ 완료 취소';
+    btn.classList.add('undone');
+    const b = document.getElementById('b-' + step);
+    if (b) { b.textContent = '완료'; b.className = 'nb done'; }
+  }
+  const count = Object.values(doneMap).filter(Boolean).length;
+  document.getElementById('prog-txt').textContent = count + ' / ' + STEP_TOTAL;
+  document.getElementById('prog-fill').style.width = (count / STEP_TOTAL * 100) + '%';
+}
+function cp(btn, id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    btn.textContent = '✓ 복사됨';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
 </body>
 </html>
