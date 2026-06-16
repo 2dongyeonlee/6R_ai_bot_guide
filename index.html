@@ -611,6 +611,7 @@ code {
 
   <div class="s-group-label">개요</div>
   <div class="nav-item active" onclick="go('overview',this)"><span class="ni">🗺️</span> 기능 & 동작 흐름</div>
+  <div class="nav-item" onclick="go('components',this)"><span class="ni">🧱</span> 구성 요소</div>
 
   <div class="s-group-label">비서봇 기능</div>
   <div class="nav-item" onclick="go('f-search',this)"><span class="ni">📂</span> 자료 검색·전송</div>
@@ -676,6 +677,15 @@ code {
     <div class="banner info" style="margin-bottom:0"><div class="banner-i">🧩</div><div>핵심 4요소 — <strong>D1</strong>(저장) · <strong>Vectorize+Workers AI</strong>(의미 검색) · <strong>KV</strong>(프롬프트·히스토리) · <strong>Claude API</strong>(두뇌). 각각은 <strong>Step 3·4</strong>에서 만든다.</div></div>
   </div>
 
+  <div class="banner info" style="margin-bottom:0"><div class="banner-i">🧩</div><div>봇을 이루는 <strong>구성 요소(D1·KV·Vectorize·Workers AI·Claude)</strong>는 좌측 <strong>구성 요소</strong> 페이지에서, 만드는 방법은 <strong>구축 단계</strong>에서 확인.</div></div>
+</div>
+
+<!-- ══════ 구성 요소 ══════ -->
+<div class="section" id="sec-components">
+  <div class="sec-eyebrow">Components</div>
+  <div class="sec-title">🧱 구성 요소</div>
+  <div class="sec-desc">봇을 이루는 도구와 각자의 역할, worker.js에서 쓰이는 바인딩·키. 만드는 방법은 <strong>구축 단계</strong> 참고.</div>
+
   <div class="card">
     <div class="card-title">💡 구성 요소 한눈에</div>
     <table class="gt">
@@ -691,6 +701,7 @@ code {
         <tr><td><strong>🔍 Tavily</strong></td><td>실시간 외부 검색 (선택)</td><td><code>TAVILY_API_KEY</code></td><td class="tag-free">월 1,000건 무료</td></tr>
       </tbody>
     </table>
+    <div class="banner info" style="margin-bottom:0"><div class="banner-i">🧩</div><div>핵심 4요소 — <strong>D1</strong>(저장) · <strong>Vectorize+Workers AI</strong>(의미 검색) · <strong>KV</strong>(프롬프트·히스토리) · <strong>Claude API</strong>(두뇌).</div></div>
   </div>
 </div>
 
