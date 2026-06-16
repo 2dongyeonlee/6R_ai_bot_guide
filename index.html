@@ -199,6 +199,40 @@
     color: var(--ink-mid);
   }
 
+  /* 코드 블록 */
+  pre {
+    background: #1a2533;
+    color: #e6edf3;
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 14px 0;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+  code {
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  .build-divider {
+    background: var(--accent);
+    color: #fff;
+    padding: 64px 44px;
+  }
+  .build-divider .page-label { color: #a0bce0; }
+  .build-divider h1 { color: #fff; font-size: 32px; margin-bottom: 14px; }
+  .build-divider .desc { color: #a8c0d8; margin-bottom: 0; }
+  .step-list { counter-reset: stp; }
+  .step-list h3 { font-size: 17px; font-weight: 700; margin: 26px 0 8px; }
+  ul, ol { margin: 10px 0 10px 20px; }
+  li { font-size: 14px; color: var(--ink-mid); margin-bottom: 5px; }
+
   @media (max-width: 680px) {
     .page, .cover { padding: 44px 22px; }
     h1 { font-size: 28px; }
@@ -214,7 +248,7 @@
   <h1>권오혁 비서봇<br>운영 가이드</h1>
   <div class="divider"></div>
   <p class="desc">텔레그램 기반 AI 비서봇의 구조와 기능을 정리한 운영 참고 문서입니다.</p>
-  <a class="cover-cta" href="guide.html">상세 구축 가이드 보기 →</a>
+  <a class="cover-cta" href="#build">상세 구축 가이드 보기 ↓</a>
   <div class="meta">2026. 6. 17</div>
 </section>
 
@@ -379,12 +413,175 @@
   </table>
 </section>
 
-<!-- 상세 가이드 링크 -->
-<section class="page" style="text-align:center;">
-  <div class="page-label">상세 가이드</div>
-  <h2>처음부터 직접 구축하기</h2>
-  <p class="desc" style="margin:0 auto 28px;">텔레그램 봇 생성부터 Cloudflare 배포, worker.js 코드 구조, 트러블슈팅까지 단계별 전체 가이드입니다.</p>
-  <a class="cover-cta" href="guide.html" style="background:var(--accent); color:#fff;">상세 구축 가이드 열기 →</a>
+<!-- ===== 상세 구축 가이드 (슬림 버전) ===== -->
+<section class="page build-divider" id="build">
+  <div class="page-label">상세 구축 가이드</div>
+  <h1>처음부터 직접 만들기</h1>
+  <p class="desc">Dify 없이 Cloudflare + Claude만으로 새 봇 하나를 처음부터 끝까지 구축하는 단계별 가이드입니다.</p>
+</section>
+
+<!-- 전체 구조 -->
+<section class="page">
+  <div class="page-label">05 — 전체 구조</div>
+  <h2>한눈에 보는 구조</h2>
+  <p class="desc">들어온 모든 것(텍스트·파일·이미지)을 텍스트화해 D1에 저장하고, 저장된 자료를 브리핑·검색·답변이 재사용합니다. Dify 같은 중간 도구 없이 Worker가 Claude를 직접 호출합니다 — 빠르고, 기밀이 외부를 경유하지 않습니다.</p>
+<pre><code>[텔레그램]
+    ↓ 메시지·파일 수신
+[Cloudflare Workers]   ← 봇 로직 (worker.js)
+    ↓
+[Cloudflare D1]        ← 모든 메시지·요약·파일 정보 저장
+[Cloudflare KV]        ← 시스템 프롬프트·대화 히스토리
+[Cloudflare Vectorize] ← 의미 기반 검색 색인
+    ↓
+[Claude API]           ← 요약·분석·답변 (두뇌)
+[Tavily API]           ← 실시간 외부 검색 (선택)
+    ↓
+[텔레그램]             ← 답변 전송</code></pre>
+</section>
+
+<!-- 준비물 -->
+<section class="page">
+  <div class="page-label">06 — 준비물</div>
+  <h2>필요한 것</h2>
+  <table>
+    <tr><th>항목</th><th>용도</th><th>비용</th></tr>
+    <tr><td>텔레그램 계정</td><td>봇 생성 (BotFather)</td><td>무료</td></tr>
+    <tr><td>Cloudflare 계정</td><td>서버·DB·KV·Vectorize</td><td>무료 (10GB까지)</td></tr>
+    <tr><td>Anthropic API 키</td><td>Claude 두뇌</td><td>사용량 비례 ($20~50/월)</td></tr>
+    <tr><td>Tavily API 키</td><td>외부 검색 (선택)</td><td>월 1,000건 무료</td></tr>
+    <tr><td>Node.js + wrangler</td><td>배포 도구</td><td>무료</td></tr>
+  </table>
+</section>
+
+<!-- 단계별 구축 -->
+<section class="page">
+  <div class="page-label">07 — 단계별 구축</div>
+  <h2>봇 만들기 8단계</h2>
+  <div class="step-list">
+    <h3>1. 텔레그램 봇 생성</h3>
+    <p>텔레그램에서 <code>@BotFather</code> → <code>/newbot</code> → 이름·사용자명(<code>_bot</code>으로 끝) 설정 → <b>봇 토큰</b> 저장. <code>/setprivacy</code> → <code>Disable</code> (그룹방 전체 메시지 수신에 필수).</p>
+
+    <h3>2. Cloudflare 세팅</h3>
+<pre><code>npm install -g wrangler
+wrangler login</code></pre>
+
+    <h3>3. D1 데이터베이스 생성</h3>
+<pre><code>wrangler d1 create 6r-ai-db
+# 출력되는 database_id 복사
+wrangler d1 execute 6r-ai-db --remote --file=schema.sql</code></pre>
+    <p>messages 테이블(room_id·sender_id·content·status_tag·milestone_date·file_id·summary 등)을 schema.sql로 생성합니다.</p>
+
+    <h3>4. KV 네임스페이스 생성</h3>
+<pre><code>wrangler kv namespace create PROMPT   # 시스템 프롬프트·대화 히스토리</code></pre>
+
+    <h3>5. wrangler.toml 작성</h3>
+    <p>name·main·compatibility 설정과 <code>[vars]</code>(BRIEFING_CHAT_ID·BOT_USERNAME), <code>[triggers] crons = ["0 0 * * 1-5"]</code>(KST 09:00 월~금), <code>[[d1_databases]]</code>·<code>[[kv_namespaces]]</code> 바인딩을 채웁니다.</p>
+
+    <h3>6. 비밀 키 등록</h3>
+<pre><code>wrangler secret put TELEGRAM_BOT_TOKEN
+wrangler secret put ANTHROPIC_API_KEY
+wrangler secret put TAVILY_API_KEY   # (선택)</code></pre>
+
+    <h3>7. 배포</h3>
+<pre><code>wrangler deploy   # 출력되는 Worker URL 복사</code></pre>
+
+    <h3>8. 텔레그램 웹훅 연결</h3>
+<pre><code>curl "https://api.telegram.org/bot&lt;봇토큰&gt;/setWebhook?url=&lt;WorkerURL&gt;"</code></pre>
+    <p><code>{"ok":true}</code>가 나오면 완료. 봇에게 메시지를 보내면 응답합니다.</p>
+  </div>
+</section>
+
+<!-- 핵심 코드 구조 -->
+<section class="page">
+  <div class="page-label">08 — 핵심 코드 구조</div>
+  <h2>worker.js 흐름</h2>
+  <p class="desc">처리 순서가 중요합니다. <b>저장이 먼저, 라우팅이 나중</b>입니다. (과거 저장이 라우팅 뒤에 있어 메시지가 누락된 버그가 있었음)</p>
+<pre><code>1. 봇 자신 메시지면 무시
+2. /설정 명령 → 시스템 프롬프트 수정
+3. 파일·이미지 → 추출·저장·요약 (ingestAndSummarize)
+4. 텍스트 → 잡담 아니면 먼저 DB 저장 (saveMessage)
+5. #보고 등 태그 → 업무보고 처리 (handleReport)
+6. 봇 멘션·질문 → 답변 생성 (handleQuery)
+7. 그 외는 저장만 (응답 없음)</code></pre>
+  <h3>모델 라우팅 (비용 절감 핵심)</h3>
+  <p>단순 대화는 Haiku, 분석·브리핑은 Sonnet으로 자동 분기합니다.</p>
+<pre><code>const MODEL_FAST  = "claude-haiku-4-5-20251001";  // 단순 대화
+const MODEL_SMART = "claude-sonnet-4-6";          // 분석·브리핑
+
+function isComplexQuery(query, hasFile) {
+  if (hasFile) return true;
+  if (query.length &gt; 100) return true;
+  return /(요약|분석|보고|브리핑|정리|검토|작성|전략|판단|비교|예측)/.test(query);
+}</code></pre>
+</section>
+
+<!-- 파일 처리 & 검색 -->
+<section class="page">
+  <div class="page-label">09 — 파일 처리 & 검색</div>
+  <h2>파일 처리</h2>
+  <table>
+    <tr><th>형식</th><th>처리 방식</th></tr>
+    <tr><td>PDF</td><td>Claude에 base64 document로 직접 전달 (표·레이아웃까지 인식)</td></tr>
+    <tr><td>이미지</td><td>Claude Vision으로 텍스트화 (describeImage)</td></tr>
+    <tr><td>PPTX/DOCX/XLSX</td><td>파일에 Reply 후 요약 요청 시 텍스트 추출해 답변</td></tr>
+  </table>
+
+  <h2 style="margin-top:34px;">자료 검색 (하이브리드)</h2>
+  <p class="desc">키워드와 의미 검색을 동시에 돌려 병합·중복제거 후 상위 12개를 반환합니다.</p>
+  <ul>
+    <li><b>키워드 검색</b> — content·summary·file_name·sender_name LIKE</li>
+    <li><b>의미 검색(Vectorize)</b> — 질문을 임베딩해 의미 유사 항목 조회</li>
+    <li><b>발신자 명시 검색</b> — "예슬TL이 보고한 자료"처럼 사람이 명시되면 해당 인원 우선 (NAME_ALIASES로 이름·성·영문명 변형 매칭)</li>
+    <li><b>자료 통합</b> — 단체방 파일은 copyMessage로 원본 전송, DM 전용 파일은 텍스트로 제공, 같은 파일이 양쪽에 있으면 단체방 버전 우선</li>
+  </ul>
+  <div class="note">내부 자료에 없거나 "검색해줘/최신" 요청이면 Tavily 외부 검색으로 보완하고 출처 URL을 함께 제공합니다.</div>
+</section>
+
+<!-- 브리핑 & 프롬프트 -->
+<section class="page">
+  <div class="page-label">10 — 브리핑 & 프롬프트</div>
+  <h2>아침 브리핑</h2>
+  <p class="desc">cron(KST 09:00 월~금)에 자동 실행. 날짜·태그 분류는 코드(SQL)가 결정적으로 처리하고 문장만 Claude가 생성합니다.</p>
+<pre><code>📅 YYYY-MM-DD Daily Briefing
+📌 주요 일정   (임원·담당급 언급, 날짜 확정 일정)
+🔔 보고        (팀장·TL 진행 보고)
+💡 의사결정 필요
+📋 주요 내용   (방별 핵심 공유)</code></pre>
+  <p>오늘보다 과거 날짜 항목은 코드 필터로 자동 제외됩니다.</p>
+
+  <h2 style="margin-top:34px;">시스템 프롬프트 규칙</h2>
+  <p class="desc">KV에 저장되어 <code>/설정</code> 명령으로 재배포 없이 수정 가능합니다.</p>
+  <ul>
+    <li>존댓말, 짧고 간결하게, 바로 본론</li>
+    <li>마크다운(**,#,*) 금지. HTML <code>&lt;b&gt;</code> 태그만 사용</li>
+    <li>문장 끝 "~입니다" 금지, 명사형으로 마무리</li>
+    <li>블릿(•) 사용 (모바일 가독성)</li>
+    <li>추측 금지 — 없는 정보는 만들지 않음</li>
+  </ul>
+</section>
+
+<!-- 트러블슈팅 & 비용 -->
+<section class="page">
+  <div class="page-label">11 — 트러블슈팅 & 비용</div>
+  <h2>자주 막히는 곳</h2>
+  <table>
+    <tr><th>증상</th><th>해결</th></tr>
+    <tr><td>메시지 저장 안 됨</td><td>sender_id를 String() 캐스팅 + insertMessage try-catch</td></tr>
+    <tr><td>그룹방 응답 없음</td><td>BotFather <code>/setprivacy</code> → Disable</td></tr>
+    <tr><td>외부 검색 안 됨</td><td>TAVILY_API_KEY secret 등록 확인</td></tr>
+    <tr><td>브리핑 안 옴</td><td>cron 시간(UTC) — <code>0 0 * * 1-5</code> = KST 09:00</td></tr>
+    <tr><td>한글 깨짐</td><td>코드 수정은 에디터/Codex로 (PowerShell 직접 수정 금지)</td></tr>
+  </table>
+
+  <h2 style="margin-top:34px;">비용 (월 결제액)</h2>
+  <table>
+    <tr><th>항목</th><th>비용</th></tr>
+    <tr><td>Cloudflare</td><td>무료 (10GB)</td></tr>
+    <tr><td>Claude</td><td>$20~50 (사용량 비례)</td></tr>
+    <tr><td>Tavily</td><td>월 1,000건 무료</td></tr>
+    <tr><td>기본 운영 합계</td><td><b>약 $20~80 (월 3~10만원)</b></td></tr>
+    <tr><td>초기 구축</td><td><b>0원</b> (전담 개발자 없이 내부 구현)</td></tr>
+  </table>
 </section>
 
 </body>
