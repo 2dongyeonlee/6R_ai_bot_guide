@@ -541,9 +541,62 @@ code {
   padding: 2px 6px;
   border-radius: 3px;
 }
+
+/* ── 모바일 메뉴 버튼 / 오버레이 (기본 숨김) ── */
+.menu-btn { display: none; }
+.nav-overlay { display: none; }
+
+/* ── 모바일: 사이드바 접고 본문 메인 ── */
+@media (max-width: 768px) {
+  html, body { overflow: auto; height: auto; }
+  body { display: block; }
+
+  .menu-btn {
+    display: flex; align-items: center; justify-content: center;
+    position: fixed; top: 12px; left: 12px; z-index: 120;
+    width: 44px; height: 44px;
+    border: none; border-radius: 11px;
+    background: var(--sidebar-bg); color: #fff;
+    font-size: 20px; cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.28);
+  }
+
+  .sidebar {
+    position: fixed; top: 0; left: 0; z-index: 115;
+    width: 270px; max-width: 84vw;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+  body.nav-open .sidebar { transform: translateX(0); }
+
+  .nav-overlay {
+    display: block;
+    position: fixed; inset: 0; z-index: 110;
+    background: rgba(0,0,0,0.45);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  body.nav-open .nav-overlay { opacity: 1; pointer-events: auto; }
+
+  .main { height: auto; overflow: visible; width: 100%; }
+  .content { padding: 64px 18px 64px; }
+
+  .sec-title { font-size: 23px; }
+  .sec-desc { font-size: 14px; }
+  .url-grid { grid-template-columns: 1fr 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .card { padding: 18px; }
+}
+
+@media (max-width: 460px) {
+  .url-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
+
+<button class="menu-btn" onclick="toggleNav()" aria-label="메뉴 열기">☰</button>
+<div class="nav-overlay" onclick="toggleNav()"></div>
 
 <!-- ── 사이드바 ── -->
 <aside class="sidebar">
@@ -579,6 +632,7 @@ code {
   <div class="nav-item" onclick="go('prompt',this)"><span class="ni">💬</span> 시스템 프롬프트</div>
   <div class="nav-item" onclick="go('trouble',this)"><span class="ni">🛠️</span> 트러블슈팅 & 비용</div>
   <div class="nav-item" onclick="go('future',this)"><span class="ni">🔮</span> 향후 방향</div>
+  <div class="nav-item" onclick="go('urls',this)"><span class="ni">🔗</span> 접속 주소 모음</div>
 
   <div class="s-progress">
     <div class="s-progress-label"><span>구축 진행률</span><span id="prog-txt">0 / 4</span></div>
@@ -1168,6 +1222,63 @@ const vr = await env.VECTORIZE.query(qVec, { topK: 8, returnMetadata: "all" });<
   </div>
 </div>
 
+<!-- ══════ 접속 주소 모음 ══════ -->
+<div class="section" id="sec-urls">
+  <div class="sec-eyebrow">Quick Links</div>
+  <div class="sec-title">🔗 접속 주소 모음</div>
+  <div class="sec-desc">구축·운영에 필요한 사이트 모음. 지금 탭으로 열어두면 편하다.</div>
+  <div class="url-grid">
+    <div class="url-card">
+      <div class="uc-name">📱 Telegram BotFather</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">봇 생성 · Token 발급. 봇의 입구.</div>
+      <a href="https://t.me/BotFather" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🔍 Telegram userinfobot</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">내 chat_id(숫자) 확인용. BRIEFING_CHAT_ID 등에 필요.</div>
+      <a href="https://t.me/userinfobot" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🧠 Anthropic Console</div>
+      <div class="uc-badge paid">유료</div>
+      <div class="uc-desc">Claude API Key(ANTHROPIC_API_KEY) 발급. 카드 등록 필요.</div>
+      <a href="https://console.anthropic.com" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🔍 Tavily</div>
+      <div class="uc-badge free">월 1,000건 무료</div>
+      <div class="uc-desc">외부 웹 검색 키(TAVILY_API_KEY). 선택 사항.</div>
+      <a href="https://tavily.com" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">⚡ Cloudflare Dashboard</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">Workers · D1 · KV · Vectorize · Workers AI 관리.</div>
+      <a href="https://dash.cloudflare.com" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">📚 Cloudflare 문서</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">wrangler · Vectorize · Workers AI 레퍼런스.</div>
+      <a href="https://developers.cloudflare.com/workers/" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🧠 Anthropic API 문서</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">Messages API · 모델 ID · Vision 레퍼런스.</div>
+      <a href="https://docs.anthropic.com" target="_blank" class="url-btn">접속 →</a>
+    </div>
+    <div class="url-card">
+      <div class="uc-name">🐙 GitHub</div>
+      <div class="uc-badge free">무료</div>
+      <div class="uc-desc">worker.js 코드 저장·버전 관리.</div>
+      <a href="https://github.com" target="_blank" class="url-btn">접속 →</a>
+    </div>
+  </div>
+</div>
+
 </div><!-- /content -->
 </main>
 
@@ -1177,8 +1288,12 @@ function go(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   el.classList.add('active');
-  document.querySelector('.main').scrollTo(0, 0);
+  document.body.classList.remove('nav-open');   // 모바일: 메뉴 닫기
+  window.scrollTo(0, 0);
+  const m = document.querySelector('.main');
+  if (m) m.scrollTo(0, 0);
 }
+function toggleNav() { document.body.classList.toggle('nav-open'); }
 function tog(hd) { hd.parentElement.classList.toggle('open'); }
 const STEP_TOTAL = 4;
 const doneMap = {};
