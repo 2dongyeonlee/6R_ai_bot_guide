@@ -250,7 +250,7 @@ function isComplexQuery(query, hasFile) {
 |------|----------|------|
 | PDF | Claude에 base64 document로 직접 전달 | 32MB 이하, 표·레이아웃까지 인식 |
 | 이미지 (jpg/png/webp/gif) | Claude Vision으로 텍스트화 (describeImage) | |
-| 그 외 (PPTX/DOCX 등) | 미지원 — "지원하지 않는 형식" 반환 | 향후 추가 |
+| PPTX/DOCX/XLSX | 파일에 Reply 후 요약 요청 시 텍스트 추출해 답변 | Reply 방식 |
 
 파일이 올라오면 `Promise.all`로 두 가지를 **동시에** 생성 (속도):
 1. **사용자 답변용** (Sonnet) — 일정 / 의사결정사항 / 핵심요약 양식
@@ -262,18 +262,24 @@ function isComplexQuery(query, hasFile) {
 
 ---
 
-## 6-1. 자료 검색 (searchMemory)
+## 6-1. 자료 검색 (searchMemory) — 하이브리드
 
-봇에게 "OO 자료 보내줘", "6/15 보고 뭐 있어?" 하면 D1에서 검색.
+봇에게 "OO 자료 공유해줘", "6/15 보고 뭐 있어?" 하면 D1에서 검색.
 
-**작동 방식**
-1. `searchTerms` — 질문에서 조사(을/를/이/가)·호칭(님/팀장님)·불용어(자료/파일/보내줘) 제거 후 키워드 추출
-2. `normalizeDateQuery` — "오늘/내일/모레/어제/6월15일/6-15" → `YYYY-MM-DD`로 변환해 milestone_date 매칭
-3. content·summary·file_name·sender_name을 LIKE로 검색
-4. `scoreFileHit` — 파일명 매칭(+5) > 발신자(+4) > 요약(+3) > 본문(+1) 순으로 점수 매겨 파일 우선 정렬
+**작동 방식 (키워드 + 의미 동시)**
+1. 키워드 검색(likeSearch) — content·summary·file_name·sender_name LIKE
+2. 의미 검색(Vectorize) — 질문을 임베딩해 의미 유사 항목 조회
+3. 두 결과를 병합·중복제거 → 상위 12개 반환
 
-> 한계: 키워드 기반이라 "M15X 사고"로 저장된 걸 "화재"로는 못 찾음.
-> 이 한계를 푸는 게 RAG(의미 기반 검색). 향후 고도화 항목.
+**발신자 명시 검색 (searchBySender)**
+- "예슬TL이 보고한 자료"처럼 사람이 명시되면 해당 인원 메시지 우선 필터
+- NAME_ALIASES로 이름·성·영문명 변형 자동 매칭
+
+**자료 = 파일 + 사진 + 텍스트 통합**
+- 단체방 파일 → copyMessage로 원본 전송
+- 동일 파일이 단체방·DM 양쪽에 있으면 단체방 버전 우선
+- DM 전용 파일 → 저장된 전체 내용을 텍스트로 제공
+- 텍스트 보고 → "누가·무슨 내용" 형태로 요약 답변
 
 ## 6-2. 외부 검색 (searchWeb / Tavily)
 
@@ -309,13 +315,17 @@ D1에서 status_tag별로 분류 → Claude가 양식대로 정리 → BRIEFING_
 
 **양식**
 ```
-📅 YYYY-MM-DD 아침 브리핑
-🚨 보고 임박   (D-2~D-day)
-📌 오늘 일정
+📅 YYYY-MM-DD Daily Briefing
+📌 주요 일정   (임원·담당급 언급, 날짜 확정 일정)
+🔔 보고        (팀장·TL 진행 보고)
 💡 의사결정 필요
-📢 공유        (최근 3일)
-🔁 Fup         (최근 3일)
+📋 주요 내용   (방별 핵심 공유)
 ```
+분류 기준:
+- 임원(담당급 이상)·CEO·총괄 관련 → 📌 주요 일정
+- 팀장·TL 진행 보고 → 🔔 보고
+- 판단·승인 필요 → 💡 의사결정
+- 오늘보다 과거 날짜 항목은 자동 제외 (코드 필터)
 
 > 날짜·태그 분류는 코드(SQL)가 결정적으로 처리하고, 문장만 Claude가 생성.
 > 이래야 날짜 계산이 틀리지 않음.
@@ -383,7 +393,7 @@ D1에서 status_tag별로 분류 → Claude가 양식대로 정리 → BRIEFING_
 
 | 단계 | 기능 | 추가 비용 |
 |------|------|----------|
-| RAG | 자료가 쌓여도 의미로 정확히 검색 (Cloudflare Vectorize) | +$5~10/월 |
+| RAG (적용 중) | 키워드+의미 하이브리드 검색 가동. 색인 확대 중 | Cloudflare Vectorize |
 | 구글 연동 | 드라이브·캘린더 자료 직접 읽기 | API 무료 (두뇌 비용만) |
 | 학습형 에이전트 | 보고·응답 학습 → 선제 제공 (Hermes 등) | 서버 $10~20 + 두뇌 별도 |
 
