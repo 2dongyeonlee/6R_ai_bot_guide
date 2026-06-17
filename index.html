@@ -605,7 +605,7 @@ code {
     <div class="s-title">AI 비서봇<br>운영·구축 가이드</div>
     <div class="s-meta">
       <div class="s-meta-row">Dify 없이 <strong>Cloudflare + Claude</strong></div>
-      <div class="s-meta-row" style="margin-top:8px; font-size:10px; color:#4a4a60;">KOH_AI_bot worker.js 기준</div>
+      <div class="s-meta-row" style="margin-top:8px; font-size:10px; color:#4a4a60;">슬림 버전</div>
     </div>
   </div>
 
@@ -614,9 +614,7 @@ code {
   <div class="nav-item" onclick="go('components',this)"><span class="ni">🧱</span> 구성 요소</div>
 
   <div class="s-group-label">비서봇 기능</div>
-  <div class="nav-item" onclick="go('f-search',this)"><span class="ni">📂</span> 자료 검색·전송</div>
-  <div class="nav-item" onclick="go('f-brief',this)"><span class="ni">📅</span> 아침 브리핑</div>
-  <div class="nav-item" onclick="go('f-more',this)"><span class="ni">🧩</span> 조회·요약·외부검색</div>
+  <div class="nav-item" onclick="go('features',this)"><span class="ni">🧰</span> 비서봇 기능</div>
 
   <div class="s-group-label">구축 단계</div>
   <div class="nav-item" onclick="go('s1',this)" id="nav-s1"><span class="ni">📱</span> Step 1. 텔레그램 봇<span class="nb" id="b-s1">시작</span></div>
@@ -625,9 +623,9 @@ code {
   <div class="nav-item" onclick="go('s4',this)" id="nav-s4"><span class="ni">🚀</span> Step 4. 설정 & 배포<span class="nb" id="b-s4">시작</span></div>
 
   <div class="s-group-label">동작 원리</div>
-  <div class="nav-item" onclick="go('llm',this)"><span class="ni">🔌</span> LLM 호출 (callClaude)</div>
+  <div class="nav-item" onclick="go('llm',this)"><span class="ni">🔌</span> LLM 호출 방식</div>
   <div class="nav-item" onclick="go('core',this)"><span class="ni">🧭</span> 코드 구조 & 라우팅</div>
-  <div class="nav-item" onclick="go('search',this)"><span class="ni">🔎</span> 자료 검색 원리<span class="nb new">하이브리드</span></div>
+  <div class="nav-item" onclick="go('search',this)"><span class="ni">🔎</span> 자료 검색 방식</div>
 
   <div class="s-group-label">운영 & 참고</div>
   <div class="nav-item" onclick="go('prompt',this)"><span class="ni">💬</span> 시스템 프롬프트</div>
@@ -649,151 +647,125 @@ code {
 <div class="section active" id="sec-overview">
   <div class="sec-eyebrow">Overview</div>
   <div class="sec-title">텔레그램 AI 비서봇 — 기능 & 동작 흐름</div>
-  <div class="sec-desc">각 구성원이 텔레그램에서 자기 전담 AI 비서봇과 대화한다. 들어온 메시지·파일을 저장하고, 물어보면 쌓인 자료에서 찾아 답하며, 매일 아침 브리핑을 보낸다. <strong>Dify 같은 중간 도구 없이 Cloudflare Worker가 Claude를 직접 호출</strong>한다.</div>
+  <div class="sec-desc">각 구성원이 텔레그램에서 자기 전담 AI 비서봇과 대화한다. 들어온 메시지·파일을 저장하고, 물어보면 쌓인 자료에서 찾아 답하며, 매일 아침 브리핑을 보낸다. <strong>Dify 같은 중간 도구 없이 Cloudflare가 Claude를 직접 호출</strong>한다.</div>
 
   <div class="card">
     <div class="card-title">⭐ 비서봇이 하는 일</div>
     <div class="two-col" style="margin-bottom:0">
       <div class="banner info" style="margin:0"><div class="banner-i">📂</div><div><strong>자료 검색·전송</strong> — "OO 자료 공유해줘" → 단체방 원본 파일 또는 텍스트로 제공</div></div>
       <div class="banner success" style="margin:0"><div class="banner-i">📅</div><div><strong>아침 브리핑</strong> — 평일 아침 주요 일정·보고·의사결정 자동 발송</div></div>
-      <div class="banner purple" style="margin:0"><div class="banner-i">🙋</div><div><strong>사람별 조회</strong> — "예슬TL이 보고한 내용" → 발신자 기준 모아 요약</div></div>
-      <div class="banner tip" style="margin:0"><div class="banner-i">📄</div><div><strong>문서 요약</strong> — 파일에 Reply 후 "요약해줘" → PDF·이미지·Office 추출</div></div>
-      <div class="banner warn" style="margin:0"><div class="banner-i">🌐</div><div><strong>외부 검색</strong> — 사내 자료에 없으면 Tavily 웹 검색으로 보완</div></div>
-      <div class="banner info" style="margin:0"><div class="banner-i">↪️</div><div><strong>메시지 전달</strong> — "OO에게 전해줘" → 해당 인원 DM으로 전송</div></div>
+      <div class="banner purple" style="margin:0"><div class="banner-i">🙋</div><div><strong>사람별 조회</strong> — "000이 보고한 내용" → 발신자 기준 모아 요약</div></div>
+      <div class="banner tip" style="margin:0"><div class="banner-i">📄</div><div><strong>문서 요약</strong> — 파일에 답장 후 "요약해줘" → PDF·이미지·문서 추출</div></div>
+      <div class="banner warn" style="margin:0"><div class="banner-i">🌐</div><div><strong>외부 검색</strong> — 사내 자료에 없으면 실시간 웹 검색으로 보완</div></div>
+      <div class="banner info" style="margin:0"><div class="banner-i">↪️</div><div><strong>메시지 전달</strong> — "000에게 전해줘" → 해당 인원에게 전송</div></div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-title">🔄 메시지 처리 전체 흐름</div>
     <div class="flow"><span class="fo">📱 텔레그램에 메시지·파일·이미지 도착</span>
-         ↓  <span class="fd">(Webhook — 텔레그램이 Cloudflare로 자동 전달)</span>
-<span class="fa">⚡ Cloudflare Worker (worker.js)</span>
-         ├── <span class="fp">저장 먼저</span>  →  <span class="fg">🗄️ D1 저장</span> + <span class="fg">🧷 Vectorize 색인 (bge-m3 임베딩)</span>
-         └── <span class="fd">질문이면</span>  →  <span class="fg">🔎 하이브리드 검색 (키워드 + 의미)</span>
+         ↓  <span class="fd">(텔레그램이 메시지를 봇 서버로 자동 전달)</span>
+<span class="fa">⚡ Cloudflare (봇 서버)</span>
+         ├── <span class="fp">먼저 저장</span>  →  <span class="fg">🗄️ 데이터베이스에 저장</span>
+         └── <span class="fd">질문이면</span>  →  <span class="fg">🔎 똑똑한 검색 (단어 + 뜻)</span>
                               ↓
-                    <span class="fa">🧠 Claude 호출</span>  <span class="fd">api.anthropic.com  (단순=Haiku / 분석=Sonnet)</span>
+                    <span class="fa">🧠 Claude 호출</span>  <span class="fd">단순=빠른 모델 / 분석=똑똑한 모델</span>
                               ↓
 <span class="fo">📱 텔레그램으로 답변·파일 전송</span></div>
-    <div class="banner info" style="margin-bottom:0"><div class="banner-i">🧩</div><div>핵심 4요소 — <strong>D1</strong>(저장) · <strong>Vectorize+Workers AI</strong>(의미 검색) · <strong>KV</strong>(프롬프트·히스토리) · <strong>Claude API</strong>(두뇌). 각각은 <strong>Step 3·4</strong>에서 만든다.</div></div>
+    <div class="banner info" style="margin-bottom:0"><div class="banner-i">🧩</div><div>봇을 이루는 <strong>구성 요소</strong>는 좌측 <strong>구성 요소</strong> 페이지에서, 만드는 방법은 <strong>구축 단계</strong>에서 확인.</div></div>
   </div>
-
-  <div class="banner info" style="margin-bottom:0"><div class="banner-i">🧩</div><div>봇을 이루는 <strong>구성 요소(D1·KV·Vectorize·Workers AI·Claude)</strong>는 좌측 <strong>구성 요소</strong> 페이지에서, 만드는 방법은 <strong>구축 단계</strong>에서 확인.</div></div>
 </div>
 
 <!-- ══════ 구성 요소 ══════ -->
 <div class="section" id="sec-components">
   <div class="sec-eyebrow">Components</div>
   <div class="sec-title">🧱 구성 요소</div>
-  <div class="sec-desc">봇을 이루는 도구와 각자의 역할, worker.js에서 쓰이는 바인딩·키. 만드는 방법은 <strong>구축 단계</strong> 참고.</div>
+  <div class="sec-desc">봇을 이루는 도구와 각자의 역할. 만드는 방법은 <strong>구축 단계</strong> 참고.</div>
 
   <div class="card">
     <div class="card-title">💡 구성 요소 한눈에</div>
     <table class="gt">
-      <thead><tr><th>도구</th><th>역할 (worker.js)</th><th>바인딩/키</th><th>비용</th></tr></thead>
+      <thead><tr><th>도구</th><th>역할</th><th>비용</th></tr></thead>
       <tbody>
-        <tr><td><strong>📱 텔레그램</strong></td><td>채팅 창구 + 파일 전송 (BotFather)</td><td><code>TELEGRAM_BOT_TOKEN</code></td><td class="tag-free">무료</td></tr>
-        <tr><td><strong>⚡ Workers</strong></td><td>봇 로직 worker.js · 24시간 서버리스</td><td>—</td><td class="tag-free">무료</td></tr>
-        <tr><td><strong>🗄️ D1</strong></td><td>messages 테이블 (메시지·요약·파일)</td><td><code>env.DB</code></td><td class="tag-free">무료</td></tr>
-        <tr><td><strong>📦 KV</strong></td><td>시스템 프롬프트·대화 히스토리</td><td><code>env.PROMPT</code></td><td class="tag-free">무료</td></tr>
-        <tr><td><strong>🧷 Vectorize</strong></td><td>의미 검색 색인 (koh-ai-vectors)</td><td><code>env.VECTORIZE</code></td><td class="tag-free">무료</td></tr>
-        <tr><td><strong>🤖 Workers AI</strong></td><td>임베딩 생성 (@cf/baai/bge-m3)</td><td><code>env.AI</code></td><td class="tag-free">무료</td></tr>
-        <tr><td><strong>🧠 Claude API</strong></td><td>요약·분석·답변 (두뇌)</td><td><code>ANTHROPIC_API_KEY</code></td><td class="tag-paid">사용량 비례</td></tr>
-        <tr><td><strong>🔍 Tavily</strong></td><td>실시간 외부 검색 (선택)</td><td><code>TAVILY_API_KEY</code></td><td class="tag-free">월 1,000건 무료</td></tr>
+        <tr><td><strong>📱 텔레그램</strong></td><td>봇과 대화하는 채팅 창구 + 파일 전송</td><td class="tag-free">무료</td></tr>
+        <tr><td><strong>⚡ Cloudflare Workers</strong></td><td>봇 로직이 도는 서버 (24시간, 안 쓰면 0원)</td><td class="tag-free">무료</td></tr>
+        <tr><td><strong>🗄️ D1</strong></td><td>모든 메시지·요약·파일 정보 저장 (데이터베이스)</td><td class="tag-free">무료</td></tr>
+        <tr><td><strong>📦 KV</strong></td><td>봇의 말투(프롬프트)·최근 대화 저장</td><td class="tag-free">무료</td></tr>
+        <tr><td><strong>🔎 똑똑한 검색</strong></td><td>단어가 달라도 뜻으로 자료를 찾아줌 (Cloudflare 기능, 별도 키 불필요)</td><td class="tag-free">무료</td></tr>
+        <tr><td><strong>🧠 Claude</strong></td><td>요약·분석·답변하는 두뇌</td><td class="tag-paid">사용량 비례</td></tr>
+        <tr><td><strong>🔍 외부 검색 (Tavily)</strong></td><td>실시간 웹 검색 (선택)</td><td class="tag-free">월 1,000건 무료</td></tr>
       </tbody>
     </table>
-    <div class="banner info" style="margin-bottom:0"><div class="banner-i">🧩</div><div>핵심 4요소 — <strong>D1</strong>(저장) · <strong>Vectorize+Workers AI</strong>(의미 검색) · <strong>KV</strong>(프롬프트·히스토리) · <strong>Claude API</strong>(두뇌).</div></div>
+    <div class="banner info" style="margin-bottom:0"><div class="banner-i">🧩</div><div>쉽게 말하면 — <strong>저장(D1)</strong> · <strong>똑똑한 검색</strong> · <strong>말투·대화 저장(KV)</strong> · <strong>두뇌(Claude)</strong> 네 가지가 핵심.</div></div>
   </div>
 </div>
 
-<!-- ══════ 기능: 자료 검색·전송 ══════ -->
-<div class="section" id="sec-f-search">
-  <div class="sec-eyebrow">Feature</div>
-  <div class="sec-title">📂 자료 검색·전송</div>
-  <div class="sec-desc">여러 방에 올라온 파일·사진·보고 메시지를 찾아 전송한다. 질문 방식에 따라 원본 파일로 보내거나 텍스트로 요약해 답한다.</div>
+<!-- ══════ 비서봇 기능 (통합) ══════ -->
+<div class="section" id="sec-features">
+  <div class="sec-eyebrow">Features</div>
+  <div class="sec-title">🧰 비서봇 기능</div>
+  <div class="sec-desc">질문 방식에 따라 자료를 파일로 보내거나 텍스트로 요약해 답한다. 아래는 실제로 쓰는 예시.</div>
 
   <div class="card">
-    <div class="card-title">💬 이렇게 쓴다</div>
-    <div class="banner info"><div class="banner-i">🗣️</div><div>"OI 전략회의 자료 공유해줘" · "6/15 보고 뭐 있어?" · "한혜승 담당이 공유한 내용 알려줘"</div></div>
+    <div class="card-title">📂 자료 검색·전송</div>
+    <div class="banner info"><div class="banner-i">🗣️</div><div>"OI 전략회의 자료 공유해줘" · "6/15 보고 뭐 있어?"</div></div>
     <table class="gt">
-      <thead><tr><th>상황</th><th>봇의 응답 (worker.js)</th></tr></thead>
+      <thead><tr><th>상황</th><th>봇의 응답</th></tr></thead>
       <tbody>
-        <tr><td>단체방 파일</td><td><code>copyMessage</code>로 원본 파일 그대로 전송</td></tr>
+        <tr><td>단체방 파일</td><td>원본 파일을 그대로 전송</td></tr>
         <tr><td>단체방·DM 양쪽에 있는 파일</td><td>단체방 버전 우선 전송</td></tr>
-        <tr><td>DM 전용 파일</td><td><code>sendDocument</code>(file_id) 또는 저장된 내용 텍스트로 제공</td></tr>
+        <tr><td>DM 전용 파일</td><td>저장된 내용을 텍스트로 제공</td></tr>
         <tr><td>텍스트 보고</td><td>"누가·무슨 내용" 형태로 요약 답변</td></tr>
       </tbody>
     </table>
-    <div class="banner warn"><div class="banner-i">⚠️</div><div>DM으로만 공유된 파일은 file_id가 봇 전용이 아니어서 재전송이 불가. 중요 자료는 봇이 참여한 <strong>단체방에 올리면</strong> 이후 원본 파일로 전송된다.</div></div>
+    <div class="banner warn" style="margin-bottom:0"><div class="banner-i">⚠️</div><div>DM으로만 공유된 파일은 재전송이 안 될 수 있다. 중요 자료는 봇이 들어가 있는 <strong>단체방에 올리면</strong> 이후 원본 파일로 전송된다.</div></div>
   </div>
-</div>
-
-<!-- ══════ 기능: 아침 브리핑 ══════ -->
-<div class="section" id="sec-f-brief">
-  <div class="sec-eyebrow">Feature</div>
-  <div class="sec-title">📅 아침 브리핑</div>
-  <div class="sec-desc">cron(<code>0 0 * * 1-5</code> = UTC 00:00 = KST 09:00, 평일)에 <code>runMorningBriefing</code>이 자동 실행. 주요 일정·보고·의사결정을 분류해 <code>BRIEFING_CHAT_ID</code> 방에 발송한다.</div>
 
   <div class="card">
-    <div class="card-title">📋 브리핑 양식</div>
+    <div class="card-title">📅 아침 브리핑</div>
+    <div class="sec-desc" style="border:none; padding:0; margin:0 0 12px; max-width:none;">평일 아침(KST 09:00) 주요 일정·보고·의사결정을 분류해 지정한 방으로 자동 발송. 오늘보다 과거 날짜 항목은 자동 제외.</div>
     <div class="flow"><span class="fo">📅 YYYY-MM-DD Daily Briefing</span>
 <span class="fa">📌 주요 일정</span>   <span class="fd">(임원·담당급 언급, 날짜 확정 일정)</span>
 <span class="fg">🔔 보고</span>        <span class="fd">(팀장·TL 진행 보고)</span>
 <span class="fp">💡 의사결정 필요</span>
 <span class="fo">📋 주요 내용</span>   <span class="fd">(방별 핵심 공유)</span></div>
-    <div class="banner success"><div class="banner-i">🎯</div><div>날짜·태그 분류는 코드(SQL)가 결정적으로 처리하고 문장만 Claude가 생성 — 날짜 계산이 틀리지 않는다. 오늘보다 과거 날짜 항목은 자동 제외.</div></div>
   </div>
-</div>
 
-<!-- ══════ 기능: 조회·요약·외부검색 ══════ -->
-<div class="section" id="sec-f-more">
-  <div class="sec-eyebrow">Feature</div>
-  <div class="sec-title">🧩 조회 · 요약 · 외부 검색</div>
-  <div class="sec-desc">사람별 조회, 문서 요약, 일정·의사결정 조회, 외부 웹 검색, 메시지 전달까지 — 일상 업무 보조 기능들.</div>
-
-  <div class="two-col">
-    <div class="card">
-      <div class="card-title">🙋 사람별 내용 조회</div>
-      <p style="font-size:14px; color:var(--text-dim); line-height:1.7;"><code>searchBySender</code> — 이름을 대면 해당 인원이 공유한 보고·자료를 모아 요약. <code>buildNameAliases</code>로 이름·성·영문명 변형 자동 인식.</p>
-      <div class="banner info" style="margin-bottom:0"><div class="banner-i">🗣️</div><div>"한혜승 담당이 공유한 내용 알려줘"</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">📄 문서 내용 요약</div>
-      <p style="font-size:14px; color:var(--text-dim); line-height:1.7;">파일에 답장(Reply) 후 요약 요청 → PDF(<code>unpdf</code>)·이미지(Vision)·Office(<code>extractOfficeText</code>) 추출해 핵심 정리.</p>
-      <div class="banner info" style="margin-bottom:0"><div class="banner-i">🗣️</div><div>파일에 Reply → "요약해줘"</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">🗓️ 일정·의사결정 조회</div>
-      <p style="font-size:14px; color:var(--text-dim); line-height:1.7;"><code>handleScheduleQuery</code> — 날짜별 확정 일정과 판단이 필요한 사항을 분리해 알려줌.</p>
-      <div class="banner info" style="margin-bottom:0"><div class="banner-i">🗣️</div><div>"내일 일정 알려줘" · "오늘 의사결정 사항?"</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">🌐 외부 검색 · ↪️ 전달</div>
-      <p style="font-size:14px; color:var(--text-dim); line-height:1.7;"><code>searchWeb</code>(Tavily)로 외부 보완 + 출처 제공. <code>handleForwardRequest</code>로 "OO에게 전해줘" → 해당 인원 DM 전송.</p>
-      <div class="banner info" style="margin-bottom:0"><div class="banner-i">🗣️</div><div>"최근 HBM 동향 찾아줘" · "권오혁 담당께 전달해줘"</div></div>
-    </div>
+  <div class="card">
+    <div class="card-title">🙋 사람별 조회 · 📄 문서 요약 · 🌐 외부 검색 · ↪️ 전달</div>
+    <table class="gt">
+      <thead><tr><th>기능</th><th>이렇게 쓴다</th></tr></thead>
+      <tbody>
+        <tr><td><strong>🙋 사람별 조회</strong></td><td>"000이 공유한 내용 알려줘" → 발신자 기준 모아 요약 (이름·성·영문명 인식)</td></tr>
+        <tr><td><strong>📄 문서 요약</strong></td><td>파일에 답장(Reply) 후 "요약해줘" → PDF·이미지·문서 읽어 핵심 정리</td></tr>
+        <tr><td><strong>🗓️ 일정·의사결정</strong></td><td>"내일 일정 알려줘" · "오늘 의사결정 사항?"</td></tr>
+        <tr><td><strong>🌐 외부 검색</strong></td><td>"최근 HBM 동향 찾아줘" → 웹 검색 + 출처 제공</td></tr>
+        <tr><td><strong>↪️ 메시지 전달</strong></td><td>"000에게 전해줘" → 해당 인원에게 전송</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
 <!-- ══════ STEP 1 ══════ -->
 <div class="section" id="sec-s1">
   <div class="sec-eyebrow">Step 1 / 4</div>
-  <div class="sec-title">📱 텔레그램 봇 생성</div>
-  <div class="sec-desc">BotFather에서 봇 이름을 만들고 Token(봇의 열쇠)을 받는다. 약 5분.</div>
+  <div class="sec-title">📱 텔레그램 봇 만들기</div>
+  <div class="sec-desc">텔레그램 안에서 "봇을 만들어주는 봇(BotFather)"과 대화해 내 봇을 만들고, 봇의 열쇠(토큰)를 받는다. 약 5분.</div>
 
-  <div class="banner info"><div class="banner-i">🔑</div><div><strong>Bot Token이란?</strong> 텔레그램이 "이게 진짜 네 봇"임을 확인하는 비밀 문자열. 나중에 Cloudflare secret <code>TELEGRAM_BOT_TOKEN</code>에 입력한다. 절대 공유 금지.</div></div>
+  <div class="banner purple"><div class="banner-i">📍</div><div><strong>어디서:</strong> 텔레그램 앱 안에서 진행. 컴퓨터·휴대폰 어디든 OK.</div></div>
 
   <div class="step-card open">
     <div class="step-hd" onclick="tog(this)">
       <div class="step-num">1</div>
-      <div class="step-info"><h3>BotFather에서 새 봇 생성</h3><p>이름·사용자명 설정 → Token 발급</p></div>
+      <div class="step-info"><h3>BotFather와 대화해 봇 생성</h3><p>이름 정하고 토큰 받기</p></div>
       <div class="step-chevron">⌄</div>
     </div>
     <div class="step-bd">
       <div class="inst-list">
-        <div class="inst"><div class="inst-n">1</div><div class="inst-t">텔레그램에서 <strong>@BotFather</strong> 검색 → 대화 시작</div></div>
-        <div class="inst"><div class="inst-n">2</div><div class="inst-t"><span class="p">/newbot</span> 입력</div></div>
-        <div class="inst"><div class="inst-n">3</div><div class="inst-t">봇 이름, 사용자명(<strong>_bot</strong>으로 끝나야 함) 설정 → <code>BOT_USERNAME</code></div></div>
-        <div class="inst"><div class="inst-n">4</div><div class="inst-t">발급된 <strong>봇 토큰</strong> 저장 (예: <span class="pg">1234567:ABC-xyz...</span>)</div></div>
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">텔레그램 검색창에 <strong>@BotFather</strong> 입력 → 파란 체크(✓) 공식 계정 선택</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">대화창에 <span class="p">/newbot</span> 보내기</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">봇 이름과 사용자명(끝이 <strong>_bot</strong>) 입력 (안내대로 따라가면 됨)</div></div>
+        <div class="inst"><div class="inst-n">4</div><div class="inst-t">BotFather가 주는 <strong>토큰</strong>을 복사해 메모장에 저장 (예: <span class="pg">1234567:ABC-xyz...</span>) — 비밀번호처럼 다룰 것</div></div>
       </div>
     </div>
   </div>
@@ -801,43 +773,43 @@ code {
   <div class="step-card">
     <div class="step-hd" onclick="tog(this)">
       <div class="step-num">2</div>
-      <div class="step-info"><h3>프라이버시 끄기</h3><p>그룹방 전체 메시지 수신에 필수</p></div>
+      <div class="step-info"><h3>그룹방 메시지 다 받게 설정</h3><p>프라이버시 끄기</p></div>
       <div class="step-chevron">⌄</div>
     </div>
     <div class="step-bd">
       <div class="inst-list">
-        <div class="inst"><div class="inst-n">1</div><div class="inst-t">BotFather에 <span class="p">/setprivacy</span> 입력</div></div>
-        <div class="inst"><div class="inst-n">2</div><div class="inst-t">해당 봇 선택 → <strong>Disable</strong></div></div>
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t">BotFather에 <span class="p">/setprivacy</span> 보내기 → 방금 만든 봇 선택</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t"><strong>Disable</strong> 선택</div></div>
       </div>
-      <div class="banner warn" style="margin-bottom:0"><div class="banner-i">⚠️</div><div>Disable 안 하면 그룹방에서 멘션된 메시지만 받는다. 전체 메시지를 저장하려면 반드시 꺼야 한다.</div></div>
+      <div class="banner warn" style="margin-bottom:0"><div class="banner-i">⚠️</div><div>이걸 안 하면 그룹방에서 봇을 직접 부른 메시지만 받는다. 방의 모든 대화를 저장하려면 꼭 Disable.</div></div>
     </div>
   </div>
 
   <div class="done-row">
     <button class="done-btn" onclick="dn('s1',this)">✓ Step 1 완료 표시</button>
-    <span class="done-note">봇 토큰을 안전하게 저장했으면 완료.</span>
+    <span class="done-note">토큰을 메모장에 저장했으면 완료.</span>
   </div>
 </div>
 
 <!-- ══════ STEP 2 : LLM 연동 ══════ -->
 <div class="section" id="sec-s2">
   <div class="sec-eyebrow">Step 2 / 4</div>
-  <div class="sec-title">🧠 LLM 연동 (Claude)</div>
-  <div class="sec-desc">봇의 두뇌인 Claude API 키를 발급받는다. worker.js는 Anthropic Messages API를 직접 호출한다 — Dify·중간 서버 없음. 약 5분.</div>
+  <div class="sec-title">🧠 봇의 두뇌(Claude) 연결</div>
+  <div class="sec-desc">봇이 생각하고 답하려면 Claude를 쓸 "API 키"가 필요하다. 키를 발급받아 메모해두고, 실제 등록은 Step 4에서 한다. 약 5분.</div>
 
-  <div class="banner purple"><div class="banner-i">🧠</div><div>worker.js는 <code>https://api.anthropic.com/v1/messages</code>를 직접 호출한다. 단순 대화는 <strong>Haiku</strong>, 분석·브리핑은 <strong>Sonnet</strong>으로 자동 분기(비용 절감). 자세한 호출 구조는 좌측 <strong>LLM 호출 (callClaude)</strong> 참고.</div></div>
+  <div class="banner purple"><div class="banner-i">📍</div><div><strong>어디서:</strong> Anthropic 사이트(<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>)에서 가입하고 키를 만든다.</div></div>
 
   <div class="step-card open">
     <div class="step-hd" onclick="tog(this)">
       <div class="step-num">1</div>
-      <div class="step-info"><h3>Anthropic API 키 발급</h3><p>console.anthropic.com</p></div>
+      <div class="step-info"><h3>Claude API 키 발급</h3><p>console.anthropic.com</p></div>
       <div class="step-chevron">⌄</div>
     </div>
     <div class="step-bd">
       <div class="inst-list">
-        <div class="inst"><div class="inst-n">1</div><div class="inst-t"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> 가입 → 결제 카드 등록</div></div>
-        <div class="inst"><div class="inst-n">2</div><div class="inst-t">API Keys → <strong>Create Key</strong> → 키 복사 (한 번만 표시됨)</div></div>
-        <div class="inst"><div class="inst-n">3</div><div class="inst-t">Step 4에서 <span class="p">wrangler secret put ANTHROPIC_API_KEY</span>로 등록</div></div>
+        <div class="inst"><div class="inst-n">1</div><div class="inst-t"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> 가입 → 결제 카드 등록 (사용량만큼 과금)</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">왼쪽 메뉴 <strong>API Keys</strong> → <strong>Create Key</strong> 클릭</div></div>
+        <div class="inst"><div class="inst-n">3</div><div class="inst-t">만들어진 키를 <strong>복사해 메모장에 저장</strong> (한 번만 보여줌, 비밀번호처럼 다룰 것)</div></div>
       </div>
     </div>
   </div>
@@ -845,40 +817,43 @@ code {
   <div class="step-card">
     <div class="step-hd" onclick="tog(this)">
       <div class="step-num">2</div>
-      <div class="step-info"><h3>(선택) Tavily 외부 검색 키</h3><p>실시간 웹 검색용</p></div>
+      <div class="step-info"><h3>(선택) 외부 웹 검색 키</h3><p>실시간 검색이 필요하면</p></div>
       <div class="step-chevron">⌄</div>
     </div>
     <div class="step-bd">
       <div class="inst-list">
         <div class="inst"><div class="inst-n">1</div><div class="inst-t"><a href="https://tavily.com" target="_blank">tavily.com</a> 가입 → API Key 발급 (월 1,000건 무료)</div></div>
-        <div class="inst"><div class="inst-n">2</div><div class="inst-t"><span class="p">wrangler secret put TAVILY_API_KEY</span>로 등록 (미등록 시 외부 검색만 비활성)</div></div>
+        <div class="inst"><div class="inst-n">2</div><div class="inst-t">키를 메모장에 저장 (이것도 Step 4에서 등록). 안 해도 외부 검색만 빠지고 나머지는 정상 동작</div></div>
       </div>
     </div>
   </div>
 
-  <div class="banner info"><div class="banner-i">🤖</div><div><strong>임베딩은 별도 키가 필요 없다.</strong> 의미 검색용 임베딩은 Cloudflare <strong>Workers AI</strong>(<code>@cf/baai/bge-m3</code>)를 쓰므로, OpenAI 같은 외부 임베딩 키 없이 Step 3에서 바인딩만 연결하면 된다.</div></div>
+  <div class="banner info"><div class="banner-i">🤖</div><div>"뜻으로 찾는 검색"에 쓰는 AI는 Cloudflare가 무료로 처리하므로 <strong>별도 키가 필요 없다.</strong></div></div>
 
   <div class="done-row">
     <button class="done-btn" onclick="dn('s2',this)">✓ Step 2 완료 표시</button>
-    <span class="done-note">ANTHROPIC_API_KEY를 확보했으면 완료.</span>
+    <span class="done-note">Claude 키를 메모장에 저장했으면 완료.</span>
   </div>
 </div>
 
 <!-- ══════ STEP 3 : Cloudflare ══════ -->
 <div class="section" id="sec-s3">
   <div class="sec-eyebrow">Step 3 / 4</div>
-  <div class="sec-title">⚡ Cloudflare 준비 (D1 · KV · Vectorize · AI)</div>
-  <div class="sec-desc">봇이 쓰는 4가지 Cloudflare 리소스를 만든다 — 저장(D1)·프롬프트(KV)·의미검색(Vectorize)·임베딩(Workers AI). 약 10분.</div>
+  <div class="sec-title">⚡ Cloudflare에 저장소 만들기</div>
+  <div class="sec-desc">봇이 쓸 저장 공간(데이터베이스·검색 색인 등)을 만든다. 여기서부터는 <strong>'터미널'</strong>에 명령어를 붙여넣는다. 약 10분.</div>
+
+  <div class="banner tip"><div class="banner-i">💻</div><div><strong>터미널이 뭔가요?</strong> 컴퓨터에 명령어를 입력하는 검은 창. <strong>Windows</strong>는 시작 메뉴에서 "PowerShell", <strong>Mac</strong>은 "터미널" 앱을 열면 된다. 아래 회색 박스의 <strong>복사</strong>를 눌러 붙여넣고 Enter만 누르면 끝.</div></div>
 
   <div class="step-card open">
     <div class="step-hd" onclick="tog(this)">
       <div class="step-num">1</div>
-      <div class="step-info"><h3>wrangler 설치 & 로그인</h3><p>Cloudflare 배포 도구</p></div>
+      <div class="step-info"><h3>도구 설치 & 로그인</h3><p>딱 한 번만</p></div>
       <div class="step-chevron">⌄</div>
     </div>
     <div class="step-bd">
+      <p style="font-size:14px; color:var(--text-dim); margin-bottom:6px;">터미널에 아래를 붙여넣기. 두 번째 줄을 실행하면 브라우저가 열리며 Cloudflare 로그인 → 허용.</p>
       <div class="code-wrap">
-        <div class="code-bar"><span class="code-fname">터미널</span><button class="copy-btn" onclick="cp(this,'c-wr')">복사</button></div>
+        <div class="code-bar"><span class="code-fname">터미널에 붙여넣기</span><button class="copy-btn" onclick="cp(this,'c-wr')">복사</button></div>
         <div class="code-body"><pre id="c-wr">npm install -g wrangler
 wrangler login</pre></div>
       </div>
@@ -888,18 +863,18 @@ wrangler login</pre></div>
   <div class="step-card">
     <div class="step-hd" onclick="tog(this)">
       <div class="step-num">2</div>
-      <div class="step-info"><h3>D1 데이터베이스 + messages 테이블</h3><p>모든 메시지·요약·파일 저장 (env.DB)</p></div>
+      <div class="step-info"><h3>데이터베이스(D1) 만들기</h3><p>메시지·파일을 저장할 곳</p></div>
       <div class="step-chevron">⌄</div>
     </div>
     <div class="step-bd">
+      <p style="font-size:14px; color:var(--text-dim); margin-bottom:6px;">아래를 붙여넣어 실행하면 <strong>database_id</strong>가 화면에 뜬다. 그 값을 메모장에 저장(Step 4에서 사용).</p>
       <div class="code-wrap">
-        <div class="code-bar"><span class="code-fname">터미널</span><button class="copy-btn" onclick="cp(this,'c-d1')">복사</button></div>
-        <div class="code-body"><pre id="c-d1">wrangler d1 create 6r-ai-db
-# 출력되는 database_id 복사해둘 것
-wrangler d1 execute 6r-ai-db --remote --file=schema.sql</pre></div>
+        <div class="code-bar"><span class="code-fname">터미널에 붙여넣기</span><button class="copy-btn" onclick="cp(this,'c-d1')">복사</button></div>
+        <div class="code-body"><pre id="c-d1">wrangler d1 create 6r-ai-db</pre></div>
       </div>
+      <p style="font-size:14px; color:var(--text-dim); margin:10px 0 6px;">이어서, 저장할 표(테이블)를 만든다. 같은 폴더에 <code>schema.sql</code> 파일을 만들어 아래 내용을 붙여넣고 저장한 뒤, 그 아래 명령을 실행.</p>
       <div class="code-wrap">
-        <div class="code-bar"><span class="code-fname">schema.sql</span><button class="copy-btn" onclick="cp(this,'c-sql')">복사</button></div>
+        <div class="code-bar"><span class="code-fname">schema.sql 에 붙여넣기</span><button class="copy-btn" onclick="cp(this,'c-sql')">복사</button></div>
         <div class="code-body"><pre id="c-sql">CREATE TABLE IF NOT EXISTS messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   telegram_message_id TEXT,
@@ -920,58 +895,52 @@ wrangler d1 execute 6r-ai-db --remote --file=schema.sql</pre></div>
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );</pre></div>
       </div>
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-fname">터미널에 붙여넣기</span><button class="copy-btn" onclick="cp(this,'c-sqlrun')">복사</button></div>
+        <div class="code-body"><pre id="c-sqlrun">wrangler d1 execute 6r-ai-db --remote --file=schema.sql</pre></div>
+      </div>
     </div>
   </div>
 
   <div class="step-card">
     <div class="step-hd" onclick="tog(this)">
       <div class="step-num">3</div>
-      <div class="step-info"><h3>KV · Vectorize 생성</h3><p>프롬프트 저장 + 의미 검색 색인</p></div>
+      <div class="step-info"><h3>말투 저장소 · 똑똑한 검색 만들기</h3><p>한 번에 두 줄 실행</p></div>
       <div class="step-chevron">⌄</div>
     </div>
     <div class="step-bd">
+      <p style="font-size:14px; color:var(--text-dim); margin-bottom:6px;">아래 두 줄을 붙여넣어 실행. 첫 줄 실행 후 나오는 <strong>id</strong>를 메모장에 저장(Step 4에서 사용). 둘째 줄은 "단어가 달라도 뜻으로 찾는 검색"을 준비하는 명령 — 그대로 붙여넣으면 된다.</p>
       <div class="code-wrap">
-        <div class="code-bar"><span class="code-fname">터미널</span><button class="copy-btn" onclick="cp(this,'c-kv')">복사</button></div>
+        <div class="code-bar"><span class="code-fname">터미널에 붙여넣기</span><button class="copy-btn" onclick="cp(this,'c-kv')">복사</button></div>
         <div class="code-body"><pre id="c-kv">wrangler kv namespace create PROMPT
-# Vectorize 색인 (bge-m3 = 1024차원, 코사인)
-wrangler vectorize create koh-ai-vectors --dimensions=1024 --metric=cosine</pre></div>
+wrangler vectorize create ai-bot-search --dimensions=1024 --metric=cosine</pre></div>
       </div>
-      <div class="banner info" style="margin-bottom:0"><div class="banner-i">💡</div><div>KV(<code>env.PROMPT</code>)는 시스템 프롬프트·대화 히스토리·reindex 진행 위치, Vectorize(<code>env.VECTORIZE</code>)는 의미 검색 색인. 출력되는 <code>id</code>를 복사해둘 것.</div></div>
-    </div>
-  </div>
-
-  <div class="step-card">
-    <div class="step-hd" onclick="tog(this)">
-      <div class="step-num">4</div>
-      <div class="step-info"><h3>Workers AI 바인딩</h3><p>임베딩 생성용 (@cf/baai/bge-m3)</p></div>
-      <div class="step-chevron">⌄</div>
-    </div>
-    <div class="step-bd">
-      <div class="banner success" style="margin-top:0"><div class="banner-i">🤖</div><div>Workers AI는 별도 생성 명령이 없다. <strong>wrangler.toml에 <code>[ai] binding = "AI"</code>만 추가</strong>하면 <code>env.AI.run("@cf/baai/bge-m3")</code>로 임베딩을 만들 수 있다. (Step 4에서 함께 설정)</div></div>
+      <div class="banner success" style="margin-bottom:0"><div class="banner-i">🤖</div><div>검색용 AI는 따로 만들 필요 없다. Step 4의 설정 파일에 두 줄만 넣으면 켜진다.</div></div>
     </div>
   </div>
 
   <div class="done-row">
     <button class="done-btn" onclick="dn('s3',this)">✓ Step 3 완료 표시</button>
-    <span class="done-note">database_id · KV id를 복사해뒀으면 완료.</span>
+    <span class="done-note">database_id · KV id를 메모장에 저장했으면 완료.</span>
   </div>
 </div>
 
 <!-- ══════ STEP 4 : 설정 & 배포 ══════ -->
 <div class="section" id="sec-s4">
   <div class="sec-eyebrow">Step 4 / 4</div>
-  <div class="sec-title">🚀 설정 & 배포</div>
-  <div class="sec-desc">wrangler.toml에 바인딩을 채우고 비밀 키를 등록한 뒤 배포하고 웹훅을 연결한다. 약 10분.</div>
+  <div class="sec-title">🚀 설정 채우고 봇 띄우기</div>
+  <div class="sec-desc">지금까지 메모한 값들을 설정 파일에 넣고, 키를 등록한 뒤 봇을 배포한다. 약 10분.</div>
 
   <div class="step-card open">
     <div class="step-hd" onclick="tog(this)">
       <div class="step-num">1</div>
-      <div class="step-info"><h3>wrangler.toml 작성</h3><p>D1·KV·Vectorize·AI 바인딩 + cron</p></div>
+      <div class="step-info"><h3>설정 파일(wrangler.toml) 채우기</h3><p>메모해둔 id를 넣는 곳</p></div>
       <div class="step-chevron">⌄</div>
     </div>
     <div class="step-bd">
+      <p style="font-size:14px; color:var(--text-dim); margin-bottom:6px;">봇 폴더의 <code>wrangler.toml</code> 파일에 아래를 붙여넣고, <strong>대괄호 표시 부분을 메모한 값으로 교체</strong>.</p>
       <div class="code-wrap">
-        <div class="code-bar"><span class="code-fname">wrangler.toml</span><button class="copy-btn" onclick="cp(this,'c-toml')">복사</button></div>
+        <div class="code-bar"><span class="code-fname">wrangler.toml 에 붙여넣기</span><button class="copy-btn" onclick="cp(this,'c-toml')">복사</button></div>
         <div class="code-body"><pre id="c-toml">name = "내봇이름"
 main = "worker.js"
 compatibility_date = "2024-11-01"
@@ -983,21 +952,21 @@ BRIEFING_CHAT_ID = "-방ID1,-방ID2"   # 아침 브리핑 보낼 방
 BOT_USERNAME = "내봇이름_bot"          # @ 제외
 
 [triggers]
-crons = ["0 0 * * 1-5"]   # UTC 00:00 = KST 09:00, 평일
+crons = ["0 0 * * 1-5"]   # 평일 아침 9시(한국)
 
 [[d1_databases]]
 binding = "DB"
 database_name = "6r-ai-db"
-database_id = "위에서_복사한_DB_ID"
+database_id = "[메모한_DB_ID]"
 
 [[kv_namespaces]]
 binding = "PROMPT"
-id = "위에서_복사한_KV_ID"
-preview_id = "위에서_복사한_KV_ID"
+id = "[메모한_KV_ID]"
+preview_id = "[메모한_KV_ID]"
 
 [[vectorize]]
 binding = "VECTORIZE"
-index_name = "koh-ai-vectors"
+index_name = "ai-bot-search"
 
 [ai]
 binding = "AI"</pre></div>
@@ -1008,55 +977,60 @@ binding = "AI"</pre></div>
   <div class="step-card">
     <div class="step-hd" onclick="tog(this)">
       <div class="step-num">2</div>
-      <div class="step-info"><h3>비밀 키 등록 & 배포</h3><p>토큰·API 키는 secret으로</p></div>
+      <div class="step-info"><h3>키 등록하고 배포</h3><p>토큰·API 키 넣기</p></div>
       <div class="step-chevron">⌄</div>
     </div>
     <div class="step-bd">
+      <p style="font-size:14px; color:var(--text-dim); margin-bottom:6px;">터미널에 한 줄씩 붙여넣고 실행. 각 줄을 실행하면 "값을 입력하라"고 나오는데, <strong>메모해둔 토큰/키를 붙여넣고 Enter</strong>.</p>
       <div class="code-wrap">
-        <div class="code-bar"><span class="code-fname">터미널</span><button class="copy-btn" onclick="cp(this,'c-sec')">복사</button></div>
-        <div class="code-body"><pre id="c-sec">wrangler secret put TELEGRAM_BOT_TOKEN   # BotFather 토큰
+        <div class="code-bar"><span class="code-fname">터미널에 붙여넣기</span><button class="copy-btn" onclick="cp(this,'c-sec')">복사</button></div>
+        <div class="code-body"><pre id="c-sec">wrangler secret put TELEGRAM_BOT_TOKEN   # 텔레그램 봇 토큰
 wrangler secret put ANTHROPIC_API_KEY    # Claude API 키
-wrangler secret put TAVILY_API_KEY       # (선택) 외부 검색
-
-wrangler deploy   # 출력되는 Worker URL 복사</pre></div>
+wrangler secret put TAVILY_API_KEY       # (선택) 외부 검색 키</pre></div>
+      </div>
+      <p style="font-size:14px; color:var(--text-dim); margin:10px 0 6px;">마지막으로 배포. 끝나면 화면에 봇 주소(Worker URL)가 뜬다 — 복사.</p>
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-fname">터미널에 붙여넣기</span><button class="copy-btn" onclick="cp(this,'c-deploy')">복사</button></div>
+        <div class="code-body"><pre id="c-deploy">wrangler deploy</pre></div>
       </div>
     </div>
   </div>
 
   <div class="step-card">
     <div class="step-hd" onclick="tog(this)">
-      <div class="step-num">3</div>
-      <div class="step-info"><h3>웹훅 연결 + 색인 초기화</h3><p>봇 ↔ Worker 연결, 기존 자료 색인</p></div>
+      <div class="step-num">4</div>
+      <div class="step-info"><h3>텔레그램과 연결 + 기존 자료 색인</h3><p>마지막!</p></div>
       <div class="step-chevron">⌄</div>
     </div>
     <div class="step-bd">
+      <p style="font-size:14px; color:var(--text-dim); margin-bottom:6px;">아래에서 <code>&lt;봇토큰&gt;</code>과 <code>&lt;WorkerURL&gt;</code>을 실제 값으로 바꿔 붙여넣기.</p>
       <div class="code-wrap">
-        <div class="code-bar"><span class="code-fname">터미널</span><button class="copy-btn" onclick="cp(this,'c-hook')">복사</button></div>
+        <div class="code-bar"><span class="code-fname">터미널에 붙여넣기</span><button class="copy-btn" onclick="cp(this,'c-hook')">복사</button></div>
         <div class="code-body"><pre id="c-hook">curl "https://api.telegram.org/bot&lt;봇토큰&gt;/setWebhook?url=&lt;WorkerURL&gt;"</pre></div>
       </div>
-      <div class="banner success"><div class="banner-i">✅</div><div><code>{"ok":true}</code>가 나오면 연결 완료. 봇에게 메시지를 보내면 응답한다.</div></div>
-      <div class="banner tip" style="margin-bottom:0"><div class="banner-i">🔁</div><div>기존에 쌓인 메시지를 의미 검색에 넣으려면 봇 DM에 <span class="p">/reindex</span>를 보낸다. 150건씩 이어서 색인되며, 200건 넘으면 반복 전송하면 된다.</div></div>
+      <div class="banner success"><div class="banner-i">✅</div><div>화면에 <code>{"ok":true}</code>가 나오면 연결 완료. 이제 봇에게 메시지를 보내면 답한다.</div></div>
+      <div class="banner tip" style="margin-bottom:0"><div class="banner-i">🔁</div><div>예전에 쌓인 대화를 검색에 넣으려면 봇에게 <span class="p">/reindex</span>를 보낸다. (자료가 많으면 몇 번 반복)</div></div>
     </div>
   </div>
 
   <div class="done-row">
     <button class="done-btn" onclick="dn('s4',this)">✓ Step 4 완료 표시</button>
-    <span class="done-note">봇이 응답하면 구축 완료!</span>
+    <span class="done-note">봇이 답하면 구축 완료!</span>
   </div>
 </div>
 
-<!-- ══════ LLM 호출 (callClaude) ══════ -->
+<!-- ══════ LLM 호출 방식 ══════ -->
 <div class="section" id="sec-llm">
   <div class="sec-eyebrow">Internals</div>
-  <div class="sec-title">🔌 LLM 호출 (callClaude)</div>
-  <div class="sec-desc">worker.js는 Anthropic Messages API를 직접 호출한다. 시스템 프롬프트는 KV에서 불러오고, 질문 복잡도에 따라 모델을 자동 선택한다.</div>
+  <div class="sec-title">🔌 LLM 호출 방식</div>
+  <div class="sec-desc">봇은 Claude를 직접 호출한다(중간 도구 없음). 시스템 프롬프트는 따로 저장된 걸 불러오고, 질문이 단순한지 복잡한지에 따라 모델을 자동으로 바꾼다.</div>
 
   <div class="card">
-    <div class="card-title">📡 Anthropic API 직접 호출</div>
+    <div class="card-title">📡 Claude 직접 호출</div>
     <div class="code-wrap">
-      <div class="code-bar"><span class="code-fname">worker.js · callClaude()</span><button class="copy-btn" onclick="cp(this,'c-claude')">복사</button></div>
-      <div class="code-body"><pre id="c-claude">const MODEL_FAST  = "claude-haiku-4-5-20251001";  // 단순 대화
-const MODEL_SMART = "claude-sonnet-4-6";          // 분석·브리핑
+      <div class="code-bar"><span class="code-fname">callClaude()</span><button class="copy-btn" onclick="cp(this,'c-claude')">복사</button></div>
+      <div class="code-body"><pre id="c-claude">const MODEL_FAST  = "claude-haiku-4-5-20251001";  // 단순 대화 (빠름·저렴)
+const MODEL_SMART = "claude-sonnet-4-6";          // 분석·브리핑 (똑똑함)
 
 const res = await fetch("https://api.anthropic.com/v1/messages", {
   method: "POST",
@@ -1066,27 +1040,27 @@ const res = await fetch("https://api.anthropic.com/v1/messages", {
     "anthropic-version": "2023-06-01",
   },
   body: JSON.stringify({
-    model,                                   // Fast 또는 Smart
+    model,                                   // 빠른 모델 또는 똑똑한 모델
     max_tokens: model === MODEL_FAST ? 500 : 1500,
-    system: effectiveSystem,                 // KV의 시스템 프롬프트
+    system: effectiveSystem,                 // 저장된 시스템 프롬프트
     messages: [{ role: "user", content: userText }],
   }),
 });</pre></div>
     </div>
-    <div class="banner info" style="margin-bottom:0"><div class="banner-i">🖼️</div><div>이미지는 <code>describeImage()</code>가 같은 엔드포인트에 base64 <code>image</code> 블록으로 보내 Claude Vision으로 텍스트화한다. PDF는 base64 <code>document</code>로 직접 전달.</div></div>
+    <div class="banner info" style="margin-bottom:0"><div class="banner-i">🖼️</div><div>이미지는 같은 방식으로 보내 Claude가 내용을 읽어 텍스트로 바꾼다. PDF도 그대로 전달해 표·서식까지 인식.</div></div>
   </div>
 
   <div class="card">
-    <div class="card-title">⚖️ 모델 자동 분기 (isComplexQuery)</div>
+    <div class="card-title">⚖️ 모델 자동 선택</div>
     <div class="code-wrap">
-      <div class="code-bar"><span class="code-fname">worker.js · isComplexQuery()</span><button class="copy-btn" onclick="cp(this,'c-model')">복사</button></div>
+      <div class="code-bar"><span class="code-fname">isComplexQuery()</span><button class="copy-btn" onclick="cp(this,'c-model')">복사</button></div>
       <div class="code-body"><pre id="c-model">function isComplexQuery(query, hasFile) {
   if (hasFile) return true;
   if (query.length &gt; 100) return true;
   return /(요약|분석|보고|브리핑|정리|검토|작성|전략|판단|비교|예측)/.test(query);
 }</pre></div>
     </div>
-    <div class="banner tip" style="margin-bottom:0"><div class="banner-i">💸</div><div>파일이 있거나 100자 초과, 분석 키워드면 Sonnet(똑똑·비쌈), 그 외엔 Haiku(빠름·저렴). 품질은 유지하고 비용은 절감.</div></div>
+    <div class="banner tip" style="margin-bottom:0"><div class="banner-i">💸</div><div>파일이 있거나 100자 초과, 분석 키워드면 똑똑한 모델, 그 외엔 빠른 모델. 품질은 유지하고 비용은 절감.</div></div>
   </div>
 </div>
 
@@ -1094,27 +1068,27 @@ const res = await fetch("https://api.anthropic.com/v1/messages", {
 <div class="section" id="sec-core">
   <div class="sec-eyebrow">Internals</div>
   <div class="sec-title">🧭 코드 구조 & 라우팅</div>
-  <div class="sec-desc"><code>handleMessage</code>의 핵심은 처리 순서다. <strong>저장이 먼저, 라우팅이 나중</strong> — 과거 저장이 라우팅 뒤에 있어 메시지가 누락된 버그가 있었다.</div>
+  <div class="sec-desc">핵심은 처리 순서다. <strong>저장이 먼저, 라우팅이 나중</strong> — 과거 저장이 뒤에 있어 메시지가 누락된 적이 있었다.</div>
 
   <div class="card">
-    <div class="card-title">📨 메시지 라우팅 순서</div>
+    <div class="card-title">📨 메시지 처리 순서</div>
     <div class="flow"><span class="fd">1.</span> 봇 자신 메시지면 <span class="fo">무시</span>
 <span class="fd">2.</span> <span class="fp">/설정 · /reindex</span> 등 명령 처리
-<span class="fd">3.</span> 파일·이미지 → <span class="fg">추출·저장·요약 (ingestAndSummarize)</span>
-<span class="fd">4.</span> 텍스트 → 잡담(isJunk) 아니면 <span class="fa">먼저 DB 저장 (saveMessage)</span>
-<span class="fd">5.</span> 보고 태그 → 업무보고 처리 (handleReport)
-<span class="fd">6.</span> 봇 멘션·DM 질문 → <span class="fg">답변 생성 (handleQuery)</span>
+<span class="fd">3.</span> 파일·이미지 → <span class="fg">추출·저장·요약</span>
+<span class="fd">4.</span> 텍스트 → 잡담 아니면 <span class="fa">먼저 저장</span>
+<span class="fd">5.</span> 보고 태그 → 업무보고 처리
+<span class="fd">6.</span> 봇 멘션·DM 질문 → <span class="fg">답변 생성</span>
 <span class="fd">7.</span> 그 외는 저장만 (응답 없음)</div>
   </div>
 
   <div class="card">
-    <div class="card-title">🧠 질문 처리 흐름 (handleQuery)</div>
+    <div class="card-title">🧠 질문에 답하는 흐름</div>
     <div class="inst-list">
-      <div class="inst"><div class="inst-n">1</div><div class="inst-t">대화 히스토리 로드 (<code>getChatHistory</code> · KV)</div></div>
-      <div class="inst"><div class="inst-n">2</div><div class="inst-t">내부 자료 검색 (<code>searchMemory</code> → D1 + Vectorize)</div></div>
-      <div class="inst"><div class="inst-n">3</div><div class="inst-t">내부에 없으면 외부 검색 (<code>searchWeb</code> → Tavily)</div></div>
-      <div class="inst"><div class="inst-n">4</div><div class="inst-t">복잡도 판단(<code>isComplexQuery</code>) → 모델 선택 → <code>callClaude</code></div></div>
-      <div class="inst"><div class="inst-n">5</div><div class="inst-t">히스토리 저장 (<code>saveChatHistory</code>) · 파일 요청이면 재전송</div></div>
+      <div class="inst"><div class="inst-n">1</div><div class="inst-t">최근 대화 맥락 불러오기</div></div>
+      <div class="inst"><div class="inst-n">2</div><div class="inst-t">내부 자료 검색 (키워드 + 의미)</div></div>
+      <div class="inst"><div class="inst-n">3</div><div class="inst-t">내부에 없으면 외부 웹 검색</div></div>
+      <div class="inst"><div class="inst-n">4</div><div class="inst-t">질문 복잡도 판단 → 모델 선택 → Claude 호출</div></div>
+      <div class="inst"><div class="inst-n">5</div><div class="inst-t">대화 저장 · 파일 요청이면 파일 재전송</div></div>
     </div>
   </div>
 </div>
@@ -1122,36 +1096,27 @@ const res = await fetch("https://api.anthropic.com/v1/messages", {
 <!-- ══════ 자료 검색 원리 ══════ -->
 <div class="section" id="sec-search">
   <div class="sec-eyebrow">Internals</div>
-  <div class="sec-title">🔎 자료 검색 원리 (하이브리드)</div>
-  <div class="sec-desc"><code>searchMemory</code>가 키워드 검색과 의미 검색을 동시에 돌려 병합·중복제거한다.</div>
+  <div class="sec-title">🔎 자료 검색 방식</div>
+  <div class="sec-desc">키워드 검색과 의미 검색을 동시에 돌려 합친 뒤, 중복을 빼고 가장 관련 있는 것부터 보여준다.</div>
 
   <div class="card">
-    <div class="card-title">🧬 하이브리드 검색</div>
+    <div class="card-title">🧬 단어 + 뜻, 두 가지로 찾기</div>
     <div class="inst-list">
-      <div class="inst"><div class="inst-n">1</div><div class="inst-t"><strong>키워드 검색(likeSearch)</strong> — content·summary·file_name·sender_name LIKE</div></div>
-      <div class="inst"><div class="inst-n">2</div><div class="inst-t"><strong>의미 검색</strong> — 질문을 <code>embedText</code>(bge-m3)로 임베딩 → <code>VECTORIZE.query(qVec, {topK: 8})</code></div></div>
-      <div class="inst"><div class="inst-n">3</div><div class="inst-t">두 결과를 <strong>병합·중복제거</strong> 후 점수순 정렬</div></div>
+      <div class="inst"><div class="inst-n">1</div><div class="inst-t"><strong>단어로 찾기</strong> — 내용·요약·파일명·보낸사람에서 같은 단어 검색</div></div>
+      <div class="inst"><div class="inst-n">2</div><div class="inst-t"><strong>뜻으로 찾기</strong> — 단어가 달라도 의미가 비슷한 자료를 찾아줌</div></div>
+      <div class="inst"><div class="inst-n">3</div><div class="inst-t">두 결과를 <strong>합치고 중복 제거</strong> 후 관련도 순 정렬</div></div>
     </div>
-    <div class="code-wrap">
-      <div class="code-bar"><span class="code-fname">worker.js · embed → vectorize</span><button class="copy-btn" onclick="cp(this,'c-embed')">복사</button></div>
-      <div class="code-body"><pre id="c-embed">// 임베딩: Cloudflare Workers AI (외부 키 불필요)
-const result = await env.AI.run("@cf/baai/bge-m3", { text: texts });
-// 색인
-await env.VECTORIZE.upsert(vectors);
-// 검색
-const vr = await env.VECTORIZE.query(qVec, { topK: 8, returnMetadata: "all" });</pre></div>
-    </div>
-    <div class="banner success" style="margin-bottom:0"><div class="banner-i">✨</div><div>키워드만 쓰던 시절엔 "M15X 사고"를 "화재"로 못 찾았다. 의미 검색이 붙으면서 이 한계가 풀렸다. 기존 자료는 <span class="p">/reindex</span>로 색인.</div></div>
+    <div class="banner success" style="margin-bottom:0"><div class="banner-i">✨</div><div>키워드만 쓰던 때는 "M15X 사고"를 "화재"로 못 찾았다. 의미 검색이 붙으며 이 한계가 풀렸다. 예전 자료는 봇에 <span class="p">/reindex</span>를 보내 색인.</div></div>
   </div>
 
   <div class="card">
-    <div class="card-title">📎 파일 처리 (ingestAndSummarize)</div>
+    <div class="card-title">📎 파일 읽기</div>
     <table class="gt">
-      <thead><tr><th>형식</th><th>처리 방식 (worker.js)</th></tr></thead>
+      <thead><tr><th>형식</th><th>처리</th></tr></thead>
       <tbody>
-        <tr><td><strong>PDF</strong></td><td><code>unpdf</code>로 텍스트 추출 + Claude에 base64 document 전달</td></tr>
-        <tr><td><strong>이미지</strong></td><td><code>describeImage</code> — Claude Vision으로 텍스트화</td></tr>
-        <tr><td><strong>PPTX/DOCX/XLSX</strong></td><td><code>extractOfficeText</code> — 파일에 Reply 후 요약 요청 시 추출</td></tr>
+        <tr><td><strong>PDF</strong></td><td>텍스트 추출 + Claude에 그대로 전달 (표·서식 인식)</td></tr>
+        <tr><td><strong>이미지</strong></td><td>Claude가 보고 내용을 텍스트로 변환</td></tr>
+        <tr><td><strong>PPTX/DOCX/XLSX</strong></td><td>파일에 답장 후 요약 요청 시 텍스트 추출</td></tr>
       </tbody>
     </table>
   </div>
@@ -1161,7 +1126,7 @@ const vr = await env.VECTORIZE.query(qVec, { topK: 8, returnMetadata: "all" });<
 <div class="section" id="sec-prompt">
   <div class="sec-eyebrow">Operations</div>
   <div class="sec-title">💬 시스템 프롬프트 규칙</div>
-  <div class="sec-desc">봇 응답 품질을 좌우하는 핵심. <code>DEFAULT_SYSTEM_PROMPT</code> + KV의 보강 프롬프트로 구성되며, <code>/설정 ...</code> 명령으로 재배포 없이 수정 가능하다(<code>updateSystemPrompt</code>).</div>
+  <div class="sec-desc">봇의 말투·답변 품질을 좌우하는 핵심. 텔레그램에서 <code>/설정 ...</code> 명령으로 재배포 없이 바로 바꿀 수 있다.</div>
 
   <div class="card">
     <div class="card-title">✅ 검증된 규칙</div>
@@ -1169,11 +1134,11 @@ const vr = await env.VECTORIZE.query(qVec, { topK: 8, returnMetadata: "all" });<
       <div class="inst"><div class="inst-n">1</div><div class="inst-t">존댓말, 짧고 간결하게, 바로 본론</div></div>
       <div class="inst"><div class="inst-n">2</div><div class="inst-t">마크다운(**,#,*) 금지. HTML <strong>&lt;b&gt;</strong> 태그만 사용</div></div>
       <div class="inst"><div class="inst-n">3</div><div class="inst-t">문장 끝 "~입니다" 금지. <strong>명사형</strong>으로 끝낼 것</div></div>
-      <div class="inst"><div class="inst-n">4</div><div class="inst-t">블릿포인트(•) 사용 (텔레그램 모바일 가독성)</div></div>
+      <div class="inst"><div class="inst-n">4</div><div class="inst-t">블릿포인트(•) 사용 (모바일 가독성)</div></div>
       <div class="inst"><div class="inst-n">5</div><div class="inst-t">긴급(오늘·D-1)은 🚨, D-7 이내는 ⚠️ 표시</div></div>
       <div class="inst"><div class="inst-n">6</div><div class="inst-t"><strong>추측 금지.</strong> 없는 정보는 만들지 않음</div></div>
     </div>
-    <div class="banner info" style="margin-bottom:0"><div class="banner-i">⚙️</div><div>텔레그램에서 <span class="p">/설정 앞으로는 일정은 표로 정리</span>처럼 보내면 KV에 보강 지시가 누적되어 즉시 반영된다.</div></div>
+    <div class="banner info" style="margin-bottom:0"><div class="banner-i">⚙️</div><div>텔레그램에서 <span class="p">/설정 앞으로 일정은 표로 정리</span>처럼 보내면 지시가 누적되어 즉시 반영된다.</div></div>
   </div>
 </div>
 
@@ -1186,14 +1151,13 @@ const vr = await env.VECTORIZE.query(qVec, { topK: 8, returnMetadata: "all" });<
   <div class="card">
     <div class="card-title">🚧 자주 막히는 곳</div>
     <table class="gt">
-      <thead><tr><th>증상</th><th>원인</th><th>해결</th></tr></thead>
+      <thead><tr><th>증상</th><th>해결</th></tr></thead>
       <tbody>
-        <tr><td>메시지 저장 안 됨</td><td>sender_id NULL로 INSERT 실패</td><td><code>String()</code> 캐스팅 + try-catch</td></tr>
-        <tr><td>그룹방 응답 없음</td><td>BotFather privacy 설정</td><td><code>/setprivacy</code> → Disable</td></tr>
-        <tr><td>의미 검색 안 됨</td><td>AI·Vectorize 미바인딩</td><td>wrangler.toml <code>[ai]</code>·<code>[[vectorize]]</code> 확인</td></tr>
-        <tr><td>외부 검색 안 됨</td><td>TAVILY_API_KEY 미등록</td><td>secret 등록 확인</td></tr>
-        <tr><td>브리핑 안 옴</td><td>cron 시간(UTC 기준)</td><td><code>0 0 * * 1-5</code> = KST 09:00</td></tr>
-        <tr><td>한글 깨짐</td><td>PowerShell 직접 수정</td><td>에디터/Codex로 수정, UTF-8 유지</td></tr>
+        <tr><td>그룹방에서 응답 없음</td><td>BotFather <code>/setprivacy</code> → Disable 했는지 확인</td></tr>
+        <tr><td>의미 검색이 안 됨</td><td>설정 파일에 검색 관련 두 줄(<code>[ai]</code>, <code>[[vectorize]]</code>)을 넣었는지 확인</td></tr>
+        <tr><td>외부 검색이 안 됨</td><td>Tavily 키 등록 여부 확인 (선택 기능)</td></tr>
+        <tr><td>아침 브리핑 안 옴</td><td>cron 시간은 한국시간 09:00 (<code>0 0 * * 1-5</code>)</td></tr>
+        <tr><td>한글이 깨짐</td><td>코드는 메모장 대신 전용 에디터로 수정 (UTF-8 유지)</td></tr>
       </tbody>
     </table>
   </div>
@@ -1203,9 +1167,9 @@ const vr = await env.VECTORIZE.query(qVec, { topK: 8, returnMetadata: "all" });<
     <table class="gt">
       <thead><tr><th>항목</th><th>비용</th></tr></thead>
       <tbody>
-        <tr><td>Cloudflare (Workers·D1·KV·Vectorize·AI)</td><td class="tag-free">무료 (10GB)</td></tr>
+        <tr><td>Cloudflare (서버·저장·검색)</td><td class="tag-free">무료 (10GB)</td></tr>
         <tr><td>Claude (두뇌)</td><td>$20~50 (사용량 비례)</td></tr>
-        <tr><td>Tavily (검색)</td><td>월 1,000건 무료, 초과 시 $30~</td></tr>
+        <tr><td>외부 검색 (Tavily)</td><td>월 1,000건 무료, 초과 시 $30~</td></tr>
         <tr><td><strong>기본 운영 합계</strong></td><td><strong>약 $20~80 (월 3~10만원)</strong></td></tr>
         <tr><td><strong>초기 구축</strong></td><td><strong style="color:var(--green)">0원</strong></td></tr>
       </tbody>
@@ -1223,13 +1187,13 @@ const vr = await env.VECTORIZE.query(qVec, { topK: 8, returnMetadata: "all" });<
     <table class="gt">
       <thead><tr><th>단계</th><th>기능</th><th>비고</th></tr></thead>
       <tbody>
-        <tr><td><strong>RAG</strong> <span style="color:var(--green); font-weight:700;">(적용 중)</span></td><td>키워드+의미 하이브리드 검색 가동(bge-m3). 색인 확대 중</td><td>Cloudflare Vectorize</td></tr>
+        <tr><td><strong>RAG</strong> <span style="color:var(--green); font-weight:700;">(적용 중)</span></td><td>단어+뜻을 함께 쓰는 검색 가동. 적용 범위 확대 중</td><td>Cloudflare</td></tr>
         <tr><td>구글 연동</td><td>드라이브·캘린더 자료 직접 읽어 브리핑 반영</td><td>API 무료 (두뇌 비용만)</td></tr>
         <tr><td>학습형 에이전트</td><td>보고·응답 패턴 학습 → 선제 제공</td><td>조직 검증 후 확정</td></tr>
-        <tr><td>컴총괄 확산</td><td>각 조직 단위 자율 운영 (2단계)</td><td>중앙 구축 완료 후</td></tr>
+        <tr><td>확산</td><td>각 조직 단위 자율 운영 (2단계)</td><td>중앙 구축 완료 후</td></tr>
       </tbody>
     </table>
-    <div class="banner tip" style="margin-bottom:0"><div class="banner-i">🌱</div><div>1차는 안정성을 위해 검증된 Claude·Cloudflare로 구현. 쌓인 자료를 기억하고 선제 제시하는 방향으로 디벨롭 검토 중. AI·검색 도구는 빠르게 발전 중이라 더 낫고 저렴한 옵션으로 교체될 수 있다.</div></div>
+    <div class="banner tip" style="margin-bottom:0"><div class="banner-i">🌱</div><div>1차는 안정성을 위해 검증된 Claude·Cloudflare로 구현. 쌓인 자료를 기억하고 선제 제시하는 방향으로 디벨롭 검토 중.</div></div>
   </div>
 </div>
 
@@ -1242,49 +1206,49 @@ const vr = await env.VECTORIZE.query(qVec, { topK: 8, returnMetadata: "all" });<
     <div class="url-card">
       <div class="uc-name">📱 Telegram BotFather</div>
       <div class="uc-badge free">무료</div>
-      <div class="uc-desc">봇 생성 · Token 발급. 봇의 입구.</div>
+      <div class="uc-desc">봇 생성 · 토큰 발급. 봇의 입구.</div>
       <a href="https://t.me/BotFather" target="_blank" class="url-btn">접속 →</a>
     </div>
     <div class="url-card">
       <div class="uc-name">🔍 Telegram userinfobot</div>
       <div class="uc-badge free">무료</div>
-      <div class="uc-desc">내 chat_id(숫자) 확인용. BRIEFING_CHAT_ID 등에 필요.</div>
+      <div class="uc-desc">내 chat_id(숫자) 확인용. 브리핑 방 설정에 필요.</div>
       <a href="https://t.me/userinfobot" target="_blank" class="url-btn">접속 →</a>
     </div>
     <div class="url-card">
       <div class="uc-name">🧠 Anthropic Console</div>
       <div class="uc-badge paid">유료</div>
-      <div class="uc-desc">Claude API Key(ANTHROPIC_API_KEY) 발급. 카드 등록 필요.</div>
+      <div class="uc-desc">Claude API 키 발급. 카드 등록 필요.</div>
       <a href="https://console.anthropic.com" target="_blank" class="url-btn">접속 →</a>
     </div>
     <div class="url-card">
       <div class="uc-name">🔍 Tavily</div>
       <div class="uc-badge free">월 1,000건 무료</div>
-      <div class="uc-desc">외부 웹 검색 키(TAVILY_API_KEY). 선택 사항.</div>
+      <div class="uc-desc">외부 웹 검색 키. 선택 사항.</div>
       <a href="https://tavily.com" target="_blank" class="url-btn">접속 →</a>
     </div>
     <div class="url-card">
       <div class="uc-name">⚡ Cloudflare Dashboard</div>
       <div class="uc-badge free">무료</div>
-      <div class="uc-desc">Workers · D1 · KV · Vectorize · Workers AI 관리.</div>
+      <div class="uc-desc">Workers · D1 · KV · Vectorize 관리.</div>
       <a href="https://dash.cloudflare.com" target="_blank" class="url-btn">접속 →</a>
     </div>
     <div class="url-card">
       <div class="uc-name">📚 Cloudflare 문서</div>
       <div class="uc-badge free">무료</div>
-      <div class="uc-desc">wrangler · Vectorize · Workers AI 레퍼런스.</div>
+      <div class="uc-desc">wrangler · Vectorize 레퍼런스.</div>
       <a href="https://developers.cloudflare.com/workers/" target="_blank" class="url-btn">접속 →</a>
     </div>
     <div class="url-card">
       <div class="uc-name">🧠 Anthropic API 문서</div>
       <div class="uc-badge free">무료</div>
-      <div class="uc-desc">Messages API · 모델 ID · Vision 레퍼런스.</div>
+      <div class="uc-desc">모델 ID · Messages API 레퍼런스.</div>
       <a href="https://docs.anthropic.com" target="_blank" class="url-btn">접속 →</a>
     </div>
     <div class="url-card">
       <div class="uc-name">🐙 GitHub</div>
       <div class="uc-badge free">무료</div>
-      <div class="uc-desc">worker.js 코드 저장·버전 관리.</div>
+      <div class="uc-desc">코드 저장·버전 관리.</div>
       <a href="https://github.com" target="_blank" class="url-btn">접속 →</a>
     </div>
   </div>
@@ -1299,7 +1263,7 @@ function go(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   el.classList.add('active');
-  document.body.classList.remove('nav-open');   // 모바일: 메뉴 닫기
+  document.body.classList.remove('nav-open');
   window.scrollTo(0, 0);
   const m = document.querySelector('.main');
   if (m) m.scrollTo(0, 0);
