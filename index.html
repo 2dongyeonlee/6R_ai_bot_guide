@@ -674,6 +674,21 @@ code {
 <span class="fo">📱 텔레그램으로 답변·파일 전송</span></div>
     <div class="banner info" style="margin-bottom:0"><div class="banner-i">🧩</div><div>봇을 이루는 <strong>구성 요소</strong>는 좌측 <strong>구성 요소</strong> 페이지에서, 만드는 방법은 <strong>구축 단계</strong>에서 확인.</div></div>
   </div>
+
+  <div class="card">
+    <div class="card-title">⏱ 구축 단계 한눈에 — 처음부터 끝까지 약 30분</div>
+    <table class="gt">
+      <thead><tr><th>단계</th><th>하는 일</th><th>소요</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Step 1</strong></td><td>텔레그램에서 봇 만들기 (토큰 받기)</td><td>약 5분</td></tr>
+        <tr><td><strong>Step 2</strong></td><td>두뇌(Claude) API 키 발급</td><td>약 5분</td></tr>
+        <tr><td><strong>Step 3</strong></td><td>Cloudflare에 저장소 만들기</td><td>약 10분</td></tr>
+        <tr><td><strong>Step 4</strong></td><td>설정 채우고 봇 띄우기</td><td>약 10분</td></tr>
+        <tr><td><strong>합계</strong></td><td>봇이 답하기 시작하기까지</td><td><strong>약 30분</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="banner tip" style="margin-bottom:0"><div class="banner-i">🧰</div><div>처음 설치하는 도구가 있으면 조금 더 걸릴 수 있다. 막히면 <strong>트러블슈팅</strong> 페이지 참고.</div></div>
+  </div>
 </div>
 
 <!-- ══════ 구성 요소 ══════ -->
@@ -748,7 +763,7 @@ code {
 
 <!-- ══════ STEP 1 ══════ -->
 <div class="section" id="sec-s1">
-  <div class="sec-eyebrow">Step 1 / 4</div>
+  <div class="sec-eyebrow">Step 1 / 4 · ⏱ 약 5분</div>
   <div class="sec-title">📱 텔레그램 봇 만들기</div>
   <div class="sec-desc">텔레그램 안에서 "봇을 만들어주는 봇(BotFather)"과 대화해 내 봇을 만들고, 봇의 열쇠(토큰)를 받는다. 약 5분.</div>
 
@@ -793,7 +808,7 @@ code {
 
 <!-- ══════ STEP 2 : LLM 연동 ══════ -->
 <div class="section" id="sec-s2">
-  <div class="sec-eyebrow">Step 2 / 4</div>
+  <div class="sec-eyebrow">Step 2 / 4 · ⏱ 약 5분</div>
   <div class="sec-title">🧠 봇의 두뇌(Claude) 연결</div>
   <div class="sec-desc">봇이 생각하고 답하려면 Claude를 쓸 "API 키"가 필요하다. 키를 발급받아 메모해두고, 실제 등록은 Step 4에서 한다. 약 5분.</div>
 
@@ -838,7 +853,7 @@ code {
 
 <!-- ══════ STEP 3 : Cloudflare ══════ -->
 <div class="section" id="sec-s3">
-  <div class="sec-eyebrow">Step 3 / 4</div>
+  <div class="sec-eyebrow">Step 3 / 4 · ⏱ 약 10분</div>
   <div class="sec-title">⚡ Cloudflare에 저장소 만들기</div>
   <div class="sec-desc">봇이 쓸 저장 공간(데이터베이스·검색 색인 등)을 만든다. 여기서부터는 <strong>'터미널'</strong>에 명령어를 붙여넣는다. 약 10분.</div>
 
@@ -927,7 +942,7 @@ wrangler vectorize create ai-bot-search --dimensions=1024 --metric=cosine</pre><
 
 <!-- ══════ STEP 4 : 설정 & 배포 ══════ -->
 <div class="section" id="sec-s4">
-  <div class="sec-eyebrow">Step 4 / 4</div>
+  <div class="sec-eyebrow">Step 4 / 4 · ⏱ 약 10분</div>
   <div class="sec-title">🚀 설정 채우고 봇 띄우기</div>
   <div class="sec-desc">지금까지 메모한 값들을 설정 파일에 넣고, 키를 등록한 뒤 봇을 배포한다. 약 10분.</div>
 
@@ -1068,17 +1083,30 @@ const res = await fetch("https://api.anthropic.com/v1/messages", {
 <div class="section" id="sec-core">
   <div class="sec-eyebrow">Internals</div>
   <div class="sec-title">🧭 코드 구조 & 라우팅</div>
-  <div class="sec-desc">핵심은 처리 순서다. <strong>저장이 먼저, 라우팅이 나중</strong> — 과거 저장이 뒤에 있어 메시지가 누락된 적이 있었다.</div>
+  <div class="sec-desc">봇은 메시지가 들어오면 <strong>먼저 저장하고, 그다음 무엇을 할지 판단</strong>한다. (예전엔 순서가 반대라 메시지가 누락된 적이 있었다.)</div>
 
   <div class="card">
-    <div class="card-title">📨 메시지 처리 순서</div>
-    <div class="flow"><span class="fd">1.</span> 봇 자신 메시지면 <span class="fo">무시</span>
-<span class="fd">2.</span> <span class="fp">/설정 · /reindex</span> 등 명령 처리
-<span class="fd">3.</span> 파일·이미지 → <span class="fg">추출·저장·요약</span>
-<span class="fd">4.</span> 텍스트 → 잡담 아니면 <span class="fa">먼저 저장</span>
-<span class="fd">5.</span> 보고 태그 → 업무보고 처리
-<span class="fd">6.</span> 봇 멘션·DM 질문 → <span class="fg">답변 생성</span>
-<span class="fd">7.</span> 그 외는 저장만 (응답 없음)</div>
+    <div class="card-title">📨 메시지가 들어오면 봇이 하는 일 (순서대로)</div>
+    <div class="inst-list">
+      <div class="inst"><div class="inst-n">1</div><div class="inst-t"><strong>봇이 보낸 메시지면 그냥 넘어감</strong> — 자기 답에 또 답하는 무한 반복 방지</div></div>
+      <div class="inst"><div class="inst-n">2</div><div class="inst-t"><strong>명령어면 명령 처리</strong> — 아래 "봇 명령어" 참고</div></div>
+      <div class="inst"><div class="inst-n">3</div><div class="inst-t"><strong>파일·이미지면</strong> 내용을 읽어 요약하고 저장</div></div>
+      <div class="inst"><div class="inst-n">4</div><div class="inst-t"><strong>일반 텍스트면</strong> 의미 없는 잡담("ㅋㅋ" 등)이 아니면 먼저 저장</div></div>
+      <div class="inst"><div class="inst-n">5</div><div class="inst-t"><strong>봇을 부르거나 1:1 질문이면</strong> 답변 생성 (아래 흐름)</div></div>
+      <div class="inst"><div class="inst-n">6</div><div class="inst-t">그 외에는 <strong>저장만</strong> 하고 답하지 않음 (단체방 도배 방지)</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⌨️ 봇 명령어 (관리자가 텔레그램에서 입력)</div>
+    <table class="gt">
+      <thead><tr><th>명령어</th><th>무슨 뜻 / 언제 쓰나</th></tr></thead>
+      <tbody>
+        <tr><td><code>/설정 ...</code></td><td>봇의 <strong>말투·규칙을 바꿈</strong>. 예: <span class="p">/설정 일정은 표로 정리해줘</span> → 코드 수정·재배포 없이 즉시 반영</td></tr>
+        <tr><td><code>/reindex</code></td><td>예전에 쌓인 대화·파일을 <strong>"뜻으로 찾는 검색"에 넣어줌</strong>. 봇을 처음 켰을 때 한 번, 자료가 많으면 몇 번 반복</td></tr>
+      </tbody>
+    </table>
+    <div class="banner info" style="margin-bottom:0"><div class="banner-i">💡</div><div>명령어는 봇과의 텔레그램 대화창에 그냥 메시지처럼 입력하면 된다.</div></div>
   </div>
 
   <div class="card">
