@@ -652,12 +652,12 @@ code {
   <div class="card">
     <div class="card-title">⭐ 비서봇이 하는 일</div>
     <div class="two-col" style="margin-bottom:0">
-      <div class="banner info" style="margin:0"><div class="banner-i">📂</div><div><strong>자료 검색·전송</strong> — "OO 자료 공유해줘" → 단체방 원본 파일 또는 텍스트로 제공</div></div>
-      <div class="banner success" style="margin:0"><div class="banner-i">📅</div><div><strong>아침 브리핑</strong> — 평일 아침 주요 일정·보고·의사결정 자동 발송</div></div>
-      <div class="banner purple" style="margin:0"><div class="banner-i">🙋</div><div><strong>사람별 조회</strong> — "000이 보고한 내용" → 발신자 기준 모아 요약</div></div>
-      <div class="banner tip" style="margin:0"><div class="banner-i">📄</div><div><strong>문서 요약</strong> — 파일에 답장 후 "요약해줘" → PDF·이미지·문서 추출</div></div>
-      <div class="banner warn" style="margin:0"><div class="banner-i">🌐</div><div><strong>외부 검색</strong> — 사내 자료에 없으면 실시간 웹 검색으로 보완</div></div>
-      <div class="banner info" style="margin:0"><div class="banner-i">↪️</div><div><strong>메시지 전달</strong> — "000에게 전해줘" → 해당 인원에게 전송</div></div>
+      <div class="banner info" style="margin:0"><div class="banner-i">📂</div><div><strong>자료 검색·전송</strong><br>"OO 자료 공유해줘" → 단체방 원본 파일 또는 텍스트로 제공</div></div>
+      <div class="banner success" style="margin:0"><div class="banner-i">📅</div><div><strong>아침 브리핑</strong><br>평일 아침 주요 일정·보고·의사결정 자동 발송</div></div>
+      <div class="banner purple" style="margin:0"><div class="banner-i">🙋</div><div><strong>사람별 조회</strong><br>"000이 보고한 내용" → 발신자 기준 모아 요약</div></div>
+      <div class="banner tip" style="margin:0"><div class="banner-i">📄</div><div><strong>문서 요약</strong><br>파일에 답장 후 "요약해줘" → PDF·이미지·문서 추출</div></div>
+      <div class="banner warn" style="margin:0"><div class="banner-i">🌐</div><div><strong>외부 검색</strong><br>사내 자료에 없으면 실시간 웹 검색으로 보완</div></div>
+      <div class="banner info" style="margin:0"><div class="banner-i">↪️</div><div><strong>메시지 전달</strong><br>"000에게 전해줘" → 해당 인원에게 전송</div></div>
     </div>
   </div>
 
@@ -748,7 +748,7 @@ code {
 
 <!-- ══════ STEP 1 ══════ -->
 <div class="section" id="sec-s1">
-  <div class="sec-eyebrow">Step 1 / 4 · ⏱ 약 5분</div>
+  <div class="sec-eyebrow">Step 1 / 4</div>
   <div class="sec-title">📱 텔레그램 봇 만들기</div>
   <div class="sec-desc">텔레그램 안에서 "봇을 만들어주는 봇(BotFather)"과 대화해 내 봇을 만들고, 봇의 열쇠(토큰)를 받는다. 약 5분.</div>
 
@@ -793,7 +793,7 @@ code {
 
 <!-- ══════ STEP 2 : LLM 연동 ══════ -->
 <div class="section" id="sec-s2">
-  <div class="sec-eyebrow">Step 2 / 4 · ⏱ 약 5분</div>
+  <div class="sec-eyebrow">Step 2 / 4</div>
   <div class="sec-title">🧠 봇의 두뇌(Claude) 연결</div>
   <div class="sec-desc">봇이 생각하고 답하려면 Claude를 쓸 "API 키"가 필요하다. 키를 발급받아 메모해두고, 실제 등록은 Step 4에서 한다. 약 5분.</div>
 
@@ -838,7 +838,7 @@ code {
 
 <!-- ══════ STEP 3 : Cloudflare ══════ -->
 <div class="section" id="sec-s3">
-  <div class="sec-eyebrow">Step 3 / 4 · ⏱ 약 10분</div>
+  <div class="sec-eyebrow">Step 3 / 4</div>
   <div class="sec-title">⚡ Cloudflare에 저장소 만들기</div>
   <div class="sec-desc">봇이 쓸 저장 공간(데이터베이스·검색 색인 등)을 만든다. 여기서부터는 <strong>'터미널'</strong>에 명령어를 붙여넣는다. 약 10분.</div>
 
@@ -927,7 +927,7 @@ wrangler vectorize create ai-bot-search --dimensions=1024 --metric=cosine</pre><
 
 <!-- ══════ STEP 4 : 설정 & 배포 ══════ -->
 <div class="section" id="sec-s4">
-  <div class="sec-eyebrow">Step 4 / 4 · ⏱ 약 10분</div>
+  <div class="sec-eyebrow">Step 4 / 4</div>
   <div class="sec-title">🚀 설정 채우고 봇 띄우기</div>
   <div class="sec-desc">지금까지 메모한 값들을 설정 파일에 넣고, 키를 등록한 뒤 봇을 배포한다. 약 10분.</div>
 
@@ -1073,8 +1073,8 @@ const res = await fetch("https://api.anthropic.com/v1/messages", {
   <div class="card">
     <div class="card-title">📨 메시지가 들어오면 봇이 하는 일 (순서대로)</div>
     <div class="inst-list">
-      <div class="inst"><div class="inst-n">1</div><div class="inst-t"><strong>봇이 보낸 메시지면 그냥 넘어감</strong> — 자기 답에 또 답하는 무한 반복 방지</div></div>
-      <div class="inst"><div class="inst-n">2</div><div class="inst-t"><strong>명령어면 명령 처리</strong> — 아래 "봇 명령어" 참고</div></div>
+      <div class="inst"><div class="inst-n">1</div><div class="inst-t"><strong>봇이 보낸 메시지면 그냥 넘어감</strong><br>자기 답에 또 답하는 무한 반복 방지</div></div>
+      <div class="inst"><div class="inst-n">2</div><div class="inst-t"><strong>명령어면 명령 처리</strong><br>아래 "봇 명령어" 참고</div></div>
       <div class="inst"><div class="inst-n">3</div><div class="inst-t"><strong>파일·이미지면</strong> 내용을 읽어 요약하고 저장</div></div>
       <div class="inst"><div class="inst-n">4</div><div class="inst-t"><strong>일반 텍스트면</strong> 의미 없는 잡담("ㅋㅋ" 등)이 아니면 먼저 저장</div></div>
       <div class="inst"><div class="inst-n">5</div><div class="inst-t"><strong>봇을 부르거나 1:1 질문이면</strong> 답변 생성 (아래 흐름)</div></div>
@@ -1115,8 +1115,8 @@ const res = await fetch("https://api.anthropic.com/v1/messages", {
   <div class="card">
     <div class="card-title">🧬 단어 + 뜻, 두 가지로 찾기</div>
     <div class="inst-list">
-      <div class="inst"><div class="inst-n">1</div><div class="inst-t"><strong>단어로 찾기</strong> — 내용·요약·파일명·보낸사람에서 같은 단어 검색</div></div>
-      <div class="inst"><div class="inst-n">2</div><div class="inst-t"><strong>뜻으로 찾기</strong> — 단어가 달라도 의미가 비슷한 자료를 찾아줌</div></div>
+      <div class="inst"><div class="inst-n">1</div><div class="inst-t"><strong>단어로 찾기</strong><br>내용·요약·파일명·보낸사람에서 같은 단어 검색</div></div>
+      <div class="inst"><div class="inst-n">2</div><div class="inst-t"><strong>뜻으로 찾기</strong><br>단어가 달라도 의미가 비슷한 자료를 찾아줌</div></div>
       <div class="inst"><div class="inst-n">3</div><div class="inst-t">두 결과를 <strong>합치고 중복 제거</strong> 후 관련도 순 정렬</div></div>
     </div>
     <div class="banner success" style="margin-bottom:0"><div class="banner-i">✨</div><div>키워드만 쓰던 때는 "M15X 사고"를 "화재"로 못 찾았다. 의미 검색이 붙으며 이 한계가 풀렸다. 예전 자료는 봇에 <span class="p">/reindex</span>를 보내 색인.</div></div>
